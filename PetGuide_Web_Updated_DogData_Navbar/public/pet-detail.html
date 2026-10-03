@@ -1,0 +1,120 @@
+﻿<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>รายละเอียดสัตว์ | PetGuide</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="site-navbar">
+        <div class="nav-inner">
+          <a class="brand" href="index.html"
+            ><span class="brand-mark">🐾</span
+            ><span
+              ><strong>PetGuide</strong
+              ><small>คู่มือเลือกสัตว์เลี้ยง</small></span
+            ></a
+          >
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-label="เปิดเมนู"
+            onclick="document.body.classList.toggle('nav-open')"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="nav-menu">
+            <div class="nav-main">
+              <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a
+              ><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a
+              ><a href="favorites.html">รายการโปรด</a>
+            </div>
+            <div class="nav-actions" id="nav-auth">
+              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a
+              ><a class="nav-register" href="register.html">สมัครสมาชิก</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main class="container" id="detail"></main>
+    <footer>© 2026 PetGuide</footer>
+    <script src="/js/app.js"></script>
+    <script>
+      (async () => {
+        await loadAuthNav();
+        const id = new URLSearchParams(location.search).get("id");
+        if (!id) {
+          location.href = "/pets.html";
+          return;
+        }
+        const pet = await fetchJSON("/api/pets/" + id);
+        document.title = pet.name + " | PetGuide";
+        document.getElementById("detail").innerHTML = `
+ <a href="/pets.html" class="back">← กลับไปสัตว์เลี้ยงทั้งหมด</a>
+ <section class="detail-hero">
+   <img src="${safeUrl(pet.image)}" alt="${escapeHtml(pet.name)}">
+   <div><span class="badge">${escapeHtml(pet.category)}</span><h1>${escapeHtml(pet.name)}</h1>
+   <p class="scientific">${escapeHtml(pet.scientificName)}</p><p>${escapeHtml(pet.description)}</p>
+   <button class="btn btn-primary" onclick="favorite('${pet._id}')">♡ เพิ่มรายการโปรด</button></div>
+ </section>
+ <section class="info-grid">
+  ${info("ลักษณะทั่วไป", pet.characteristics)}
+  ${info("นิสัย", pet.personality)}
+  ${info("ลักษณะพิเศษ", pet.specialFeatures)}
+  ${info("การดูแล", pet.care)}
+  ${info("อาหาร", pet.food)}
+  ${info("อายุเฉลี่ย", pet.lifespan)}
+  ${info("ความยากในการเลี้ยง", pet.difficulty)}
+  ${info("พลังงาน", pet.energy)}
+ </section>
+ <section class="comments"><h2>ความคิดเห็น</h2>
+   <div id="comments"></div>
+   <div id="commentForm"></div>
+ </section>`;
+        const comments = await fetchJSON("/api/pets/" + id + "/comments");
+        document.getElementById("comments").innerHTML = comments.length
+          ? comments
+              .map(
+                (c) =>
+                  `<div class="comment"><b>${escapeHtml(c.username)}</b><span>⭐ ${c.rating}</span><p>${escapeHtml(c.comment)}</p></div>`,
+              )
+              .join("")
+          : "<p>ยังไม่มีความคิดเห็น</p>";
+        const me = getUser();
+        if (me)
+          document.getElementById("commentForm").innerHTML =
+            `<textarea id="comment" placeholder="เขียนความคิดเห็น..."></textarea><button class="btn btn-primary" onclick="comment('${id}')">ส่งความคิดเห็น</button>`;
+      })();
+      function info(title, text) {
+        return `<div class="info-card"><h3>${title}</h3><p>${escapeHtml(text || "-")}</p></div>`;
+      }
+      async function favorite(id) {
+        if (!getUser()) {
+          alert("กรุณา Login ก่อน");
+          return;
+        }
+        await api("/api/favorites/" + id, { method: "POST" });
+        alert("เพิ่มรายการโปรดแล้ว");
+      }
+      async function comment(id) {
+        const comment = document.getElementById("comment").value;
+        await api("/api/pets/" + id + "/comments", {
+          method: "POST",
+          body: JSON.stringify({ comment, rating: 5 }),
+        });
+        location.reload();
+      }
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = location.pathname.split("/").pop() || "index.html";
+        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+          if (a.getAttribute("href") === c) a.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

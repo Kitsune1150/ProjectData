@@ -1,0 +1,103 @@
+﻿<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>สัตว์เลี้ยง | PetGuide</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="site-navbar">
+        <div class="nav-inner">
+          <a class="brand" href="index.html"
+            ><span class="brand-mark">🐾</span
+            ><span
+              ><strong>PetGuide</strong
+              ><small>คู่มือเลือกสัตว์เลี้ยง</small></span
+            ></a
+          >
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-label="เปิดเมนู"
+            onclick="document.body.classList.toggle('nav-open')"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="nav-menu">
+            <div class="nav-main">
+              <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a
+              ><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a
+              ><a href="favorites.html">รายการโปรด</a>
+            </div>
+            <div class="nav-actions" id="nav-auth">
+              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a
+              ><a class="nav-register" href="register.html">สมัครสมาชิก</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main class="container">
+      <div class="page-title">
+        <p class="eyebrow">BREED LIBRARY</p>
+        <h1>สัตว์เลี้ยงทั้งหมด</h1>
+        <p>ค้นหาและกรองข้อมูลสัตว์เลี้ยงตามลักษณะที่คุณสนใจ</p>
+      </div>
+      <div class="filter-box">
+        <input id="search" placeholder="🔍 ค้นหาชื่อสายพันธุ์..." />
+        <select id="category">
+          <option value="">ทุกประเภท</option>
+        </select>
+        <select id="difficulty">
+          <option value="">ทุกระดับความยาก</option>
+          <option>ง่าย</option>
+          <option>ปานกลาง</option>
+          <option>ยาก</option>
+        </select>
+        <select id="size">
+          <option value="">ทุกขนาด</option>
+          <option>เล็ก</option>
+          <option>กลาง</option>
+          <option>ใหญ่</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadPets()">ค้นหา</button>
+      </div>
+      <div id="pets" class="pet-grid"></div>
+    </main>
+    <footer>© 2026 PetGuide</footer>
+    <script src="/js/app.js"></script>
+    <script>
+      async function loadPets() {
+        const p = new URLSearchParams();
+        ["search", "category", "difficulty", "size"].forEach((id) => {
+          const v = document.getElementById(id).value;
+          if (v) p.set(id, v);
+        });
+        const pets = await fetchJSON("/api/pets?" + p.toString());
+        document.getElementById("pets").innerHTML = pets.length
+          ? pets.map(petCard).join("")
+          : "<div class='empty'>ไม่พบข้อมูลสัตว์เลี้ยง</div>";
+      }
+      (async () => {
+        await loadAuthNav();
+        const cats = await fetchJSON("/api/categories");
+        document.getElementById("category").innerHTML += cats
+          .map((c) => `<option>${escapeHtml(c.name)}</option>`)
+          .join("");
+        const cat = new URLSearchParams(location.search).get("category");
+        if (cat) document.getElementById("category").value = cat;
+        await loadPets();
+      })();
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = location.pathname.split("/").pop() || "index.html";
+        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+          if (a.getAttribute("href") === c) a.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

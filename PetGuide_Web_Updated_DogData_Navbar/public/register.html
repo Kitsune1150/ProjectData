@@ -1,0 +1,58 @@
+﻿<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Register | PetGuide</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body class="auth-page">
+    <div class="auth-card">
+      <a class="brand" href="/">🐾 PetGuide</a>
+      <h1>สมัครสมาชิก</h1>
+      <form id="form">
+        <input id="username" placeholder="ชื่อผู้ใช้" required /><input
+          id="email"
+          type="email"
+          placeholder="อีเมล"
+          required
+        /><input
+          id="password"
+          type="password"
+          placeholder="รหัสผ่านอย่างน้อย 6 ตัว"
+          required
+        /><button class="btn btn-primary">สมัครสมาชิก</button>
+      </form>
+      <p id="msg"></p>
+      <p>มีบัญชีแล้ว? <a href="/login.html">เข้าสู่ระบบ</a></p>
+    </div>
+    <script src="/js/app.js"></script>
+    <script>
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+          await api("/api/auth/register", {
+            method: "POST",
+            body: JSON.stringify({
+              username: username.value,
+              email: email.value,
+              password: password.value,
+            }),
+          });
+          alert("สมัครสมาชิกสำเร็จ");
+          location.href = "/login.html";
+        } catch (e) {
+          msg.textContent = e.message;
+        }
+      };
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = location.pathname.split("/").pop() || "index.html";
+        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+          if (a.getAttribute("href") === c) a.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

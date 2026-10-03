@@ -1,0 +1,56 @@
+﻿<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login | PetGuide</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body class="auth-page">
+    <div class="auth-card">
+      <a class="brand" href="/">🐾 PetGuide</a>
+      <h1>เข้าสู่ระบบ</h1>
+      <p>เข้าสู่ระบบเพื่อใช้ฟังก์ชันสำหรับสมาชิก</p>
+      <form id="form">
+        <input id="email" type="email" placeholder="อีเมล" required /><input
+          id="password"
+          type="password"
+          placeholder="รหัสผ่าน"
+          required
+        /><button class="btn btn-primary">เข้าสู่ระบบ</button>
+      </form>
+      <p id="msg"></p>
+      <p>ยังไม่มีบัญชี? <a href="/register.html">สมัครสมาชิก</a></p>
+      <hr />
+      <small>Admin ทดลอง: admin@petguide.com / admin123</small>
+    </div>
+    <script src="/js/app.js"></script>
+    <script>
+      document.getElementById("form").onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+          const r = await api("/api/auth/login", {
+            method: "POST",
+            body: JSON.stringify({
+              email: email.value,
+              password: password.value,
+            }),
+          });
+          localStorage.setItem("token", r.token);
+          localStorage.setItem("user", JSON.stringify(r.user));
+          location.href = r.user.role === "admin" ? "/admin.html" : "/";
+        } catch (e) {
+          msg.textContent = e.message;
+        }
+      };
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = location.pathname.split("/").pop() || "index.html";
+        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+          if (a.getAttribute("href") === c) a.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

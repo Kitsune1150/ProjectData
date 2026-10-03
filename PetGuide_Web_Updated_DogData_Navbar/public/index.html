@@ -1,0 +1,111 @@
+﻿<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PetGuide | แนะนำสัตว์เลี้ยง</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="site-navbar">
+        <div class="nav-inner">
+          <a class="brand" href="index.html"
+            ><span class="brand-mark">🐾</span
+            ><span
+              ><strong>PetGuide</strong
+              ><small>คู่มือเลือกสัตว์เลี้ยง</small></span
+            ></a
+          >
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-label="เปิดเมนู"
+            onclick="document.body.classList.toggle('nav-open')"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="nav-menu">
+            <div class="nav-main">
+              <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a
+              ><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a
+              ><a href="favorites.html">รายการโปรด</a>
+            </div>
+            <div class="nav-actions" id="nav-auth">
+              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a
+              ><a class="nav-register" href="register.html">สมัครสมาชิก</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">PET INFORMATION & GUIDE</p>
+          <h1>ค้นหาสัตว์เลี้ยง<br /><span>ที่เหมาะกับคุณ</span></h1>
+          <p>
+            เรียนรู้สายพันธุ์ ลักษณะ นิสัย และระดับความยากในการดูแล
+            ก่อนตัดสินใจเลือกสัตว์เลี้ยง
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/pets.html">สำรวจสัตว์เลี้ยง</a>
+            <a class="btn btn-light" href="/recommend.html"
+              >ค้นหาสัตว์ที่เหมาะกับฉัน</a
+            >
+          </div>
+        </div>
+        <div class="hero-art">🐶<span>🐱</span><small>🐰</small></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">DISCOVER</p>
+            <h2>สัตว์เลี้ยงแนะนำ</h2>
+          </div>
+          <a href="/pets.html">ดูทั้งหมด →</a>
+        </div>
+        <div id="recommended" class="pet-grid"></div>
+      </section>
+
+      <section class="section categories">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">EXPLORE</p>
+            <h2>เลือกดูตามประเภท</h2>
+          </div>
+        </div>
+        <div id="categories" class="category-grid"></div>
+      </section>
+    </main>
+
+    <footer>© 2026 PetGuide — Pet Information Website</footer>
+    <script src="/js/app.js"></script>
+    <script>
+      (async () => {
+        await loadAuthNav();
+        const pets = await fetchJSON("/api/pets/recommended/list");
+        document.getElementById("recommended").innerHTML = pets
+          .map(petCard)
+          .join("");
+        const cats = await fetchJSON("/api/categories");
+        document.getElementById("categories").innerHTML = cats
+          .map(
+            (c) =>
+              `<a class="category-card" href="/pets.html?category=${encodeURIComponent(c.name)}"><span>🐾</span><h3>${escapeHtml(c.name)}</h3><p>${escapeHtml(c.description || "")}</p></a>`,
+          )
+          .join("");
+      })();
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = location.pathname.split("/").pop() || "index.html";
+        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+          if (a.getAttribute("href") === c) a.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

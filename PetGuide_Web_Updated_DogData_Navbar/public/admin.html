@@ -1,0 +1,222 @@
+﻿<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin | PetGuide</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="site-navbar">
+        <div class="nav-inner">
+          <a class="brand" href="index.html"
+            ><span class="brand-mark">🐾</span
+            ><span
+              ><strong>PetGuide</strong
+              ><small>คู่มือเลือกสัตว์เลี้ยง</small></span
+            ></a
+          >
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-label="เปิดเมนู"
+            onclick="document.body.classList.toggle('nav-open')"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="nav-menu">
+            <div class="nav-main">
+              <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a
+              ><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a
+              ><a href="favorites.html">รายการโปรด</a>
+            </div>
+            <div class="nav-actions" id="nav-auth">
+              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a
+              ><a class="nav-register" href="register.html">สมัครสมาชิก</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main class="container">
+      <div class="page-title">
+        <p class="eyebrow">ADMIN PANEL</p>
+        <h1>จัดการข้อมูลสัตว์เลี้ยง</h1>
+      </div>
+      <div id="stats" class="stats"></div>
+      <div class="admin-grid">
+        <section class="panel">
+          <h2 id="formTitle">เพิ่มสัตว์เลี้ยง</h2>
+          <form id="petForm">
+            <input id="petId" type="hidden" /><input
+              id="name"
+              placeholder="ชื่อสายพันธุ์ *"
+              required
+            /><input id="scientificName" placeholder="ชื่อวิทยาศาสตร์" />
+            <select id="category" required>
+              <option value="">เลือกประเภท *</option>
+            </select>
+            <textarea id="description" placeholder="คำอธิบาย"></textarea
+            ><textarea
+              id="characteristics"
+              placeholder="ลักษณะทั่วไป"
+            ></textarea
+            ><textarea id="personality" placeholder="นิสัย"></textarea>
+            <div class="two">
+              <select id="difficulty">
+                <option>ง่าย</option>
+                <option>ปานกลาง</option>
+                <option>ยาก</option></select
+              ><select id="energy">
+                <option>ต่ำ</option>
+                <option selected>ปานกลาง</option>
+                <option>สูง</option>
+              </select>
+            </div>
+            <div class="two">
+              <select id="size">
+                <option>เล็ก</option>
+                <option selected>กลาง</option>
+                <option>ใหญ่</option></select
+              ><select id="grooming">
+                <option>ต่ำ</option>
+                <option selected>ปานกลาง</option>
+                <option>สูง</option>
+              </select>
+            </div>
+            <input id="lifespan" placeholder="อายุเฉลี่ย" /><input
+              id="food"
+              placeholder="อาหาร"
+            /><textarea id="care" placeholder="การดูแล"></textarea
+            ><textarea id="specialFeatures" placeholder="ลักษณะพิเศษ"></textarea
+            ><input id="image" placeholder="URL รูปภาพ" />
+            <label class="check"
+              ><input id="recommended" type="checkbox" />
+              แสดงเป็นสัตว์แนะนำ</label
+            >
+            <button class="btn btn-primary">บันทึก</button
+            ><button type="button" class="btn btn-light" onclick="resetForm()">
+              ล้างฟอร์ม
+            </button>
+          </form>
+        </section>
+        <section class="panel">
+          <h2>รายการสัตว์เลี้ยง</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ชื่อ</th>
+                  <th>ประเภท</th>
+                  <th>ความยาก</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="/js/app.js"></script>
+    <script>
+      let pets = [];
+      (async () => {
+        const u = getUser();
+        if (!u || u.role !== "admin") {
+          location.href = "/login.html";
+          return;
+        }
+        await load();
+      })();
+      async function load() {
+        const s = await api("/api/admin/stats");
+        stats.innerHTML = `<div>สัตว์ <b>${s.pets}</b></div><div>ประเภท <b>${s.categories}</b></div><div>ผู้ใช้ <b>${s.users}</b></div><div>ความคิดเห็น <b>${s.comments}</b></div>`;
+        const c = await fetchJSON("/api/categories");
+        category.innerHTML =
+          '<option value="">เลือกประเภท *</option>' +
+          c.map((x) => `<option>${escapeHtml(x.name)}</option>`).join("");
+        pets = await fetchJSON("/api/pets");
+        rows.innerHTML = pets
+          .map(
+            (p) =>
+              `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category)}</td><td>${escapeHtml(p.difficulty)}</td><td><button onclick="editPet('${p._id}')">แก้ไข</button> <button class="danger" onclick="deletePet('${p._id}')">ลบ</button></td></tr>`,
+          )
+          .join("");
+      }
+      petForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const data = {};
+        [
+          "name",
+          "scientificName",
+          "category",
+          "description",
+          "characteristics",
+          "personality",
+          "difficulty",
+          "energy",
+          "size",
+          "grooming",
+          "lifespan",
+          "food",
+          "care",
+          "specialFeatures",
+          "image",
+        ].forEach((x) => (data[x] = document.getElementById(x).value));
+        data.recommended = recommended.checked;
+        const id = petId.value;
+        await api(id ? "/api/pets/" + id : "/api/pets", {
+          method: id ? "PUT" : "POST",
+          body: JSON.stringify(data),
+        });
+        alert(id ? "แก้ไขสำเร็จ" : "เพิ่มสำเร็จ");
+        resetForm();
+        load();
+      };
+      function editPet(id) {
+        const p = pets.find((x) => x._id === id);
+        petId.value = p._id;
+        formTitle.textContent = "แก้ไขสัตว์เลี้ยง";
+        [
+          "name",
+          "scientificName",
+          "category",
+          "description",
+          "characteristics",
+          "personality",
+          "difficulty",
+          "energy",
+          "size",
+          "grooming",
+          "lifespan",
+          "food",
+          "care",
+          "specialFeatures",
+          "image",
+        ].forEach((x) => (document.getElementById(x).value = p[x] || ""));
+        recommended.checked = !!p.recommended;
+        scrollTo(0, 0);
+      }
+      async function deletePet(id) {
+        if (!confirm("ต้องการลบข้อมูลนี้หรือไม่?")) return;
+        await api("/api/pets/" + id, { method: "DELETE" });
+        load();
+      }
+      function resetForm() {
+        petForm.reset();
+        petId.value = "";
+        formTitle.textContent = "เพิ่มสัตว์เลี้ยง";
+      }
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = location.pathname.split("/").pop() || "index.html";
+        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+          if (a.getAttribute("href") === c) a.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>
