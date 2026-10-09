@@ -304,33 +304,47 @@
     }
 
     async function loadComments() {
-      try {
-        const comments = await fetchJSON("/api/admin/comments");
-        const commentRows = document.getElementById("commentRows");
+      const tbody = document.getElementById("commentsList") || document.querySelector("#commentsModal tbody");
+      if (!tbody) return;
 
-        if (!comments || comments.length === 0) {
-          commentRows.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีความคิดเห็นในระบบ</td></tr>';
+      try {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr>`;
+
+        const comments = await api("/api/admin/comments");
+
+        if (!Array.isArray(comments)) {
+          throw new Error(comments.message || "ไม่สามารถโหลดข้อมูลความคิดเห็นได้");
+        }
+
+        if (comments.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">ยังไม่มีความคิดเห็นในระบบ</td></tr>`;
           return;
         }
 
-        commentRows.innerHTML = comments
-          .map((com) => {
-            const createdDate = com.createdAt ? new Date(com.createdAt).toLocaleDateString("th-TH") : "-";
+        // ปรับแก้ส่วนดึงข้อความความคิดเห็นให้รองรับทุกชื่อ field (comment / text / content / message / detail / body)
+        tbody.innerHTML = comments.map(c => {
+          const commentText = c.comment || c.text || c.content || c.message || c.detail || c.body || "-";
+          const petName = c.petName || c.pet?.name || (typeof c.pet === "string" ? c.pet : "-");
+          const username = c.username || c.user?.username || (typeof c.user === "string" ? c.user : "-");
 
-            return `<tr>
-          <td><b>${escapeHtml(com.petName)}</b></td>
-          <td>${escapeHtml(com.username)}</td>
-          <td>${escapeHtml(com.comment || "")}</td>
-          <td>${createdDate}</td>
-          <td><button class="danger" onclick="deleteComment('${com._id}')">ลบ</button></td>
-        </tr>`;
-          })
-          .join("");
+          return `
+        <tr>
+          <td>${escapeHtml(petName)}</td>
+          <td>${escapeHtml(username)}</td>
+          <td>${escapeHtml(commentText)}</td>
+          <td>${c.createdAt ? new Date(c.createdAt).toLocaleDateString("th-TH") : "-"}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteComment('${c._id}')">ลบ</button>
+          </td>
+        </tr>
+      `;
+        }).join("");
+
       } catch (err) {
         console.error("Failed to load comments:", err);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">เกิดข้อผิดพลาด: ${escapeHtml(err.message)}</td></tr>`;
       }
     }
-
     async function deleteComment(id) {
       if (!confirm("ต้องการลบความคิดเห็นนี้หรือไม่?")) return;
       await api("/api/admin/comments/" + id, { method: "DELETE" });
