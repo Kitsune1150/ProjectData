@@ -840,6 +840,19 @@ button.danger {
   word-break: break-word;
 }
 
+/* Keep breed names readable in the admin list table. */
+#rows th:first-child,
+#rows td:first-child {
+  min-width: 180px;
+  white-space: nowrap;
+  word-break: normal;
+}
+
+#rows th:last-child,
+#rows td:last-child {
+  min-width: 125px;
+}
+
 /* 5. ปรับแต่งปุ่มแก้ไข/ลบ ให้เรียงแนวนอนสวยงาม */
 .table-wrap table td button {
   width: auto !important; /* ป้องกันปุ่มยืดขยายเต็มช่อง */
@@ -897,6 +910,133 @@ button.danger {
 .panel {
   min-width: 0; /* ป้องกัน Flex/Grid Child ล้นขอบ */
   overflow: hidden;
+}
+
+/* Image upload control in the admin pet form */
+#petForm .image-upload {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 112px;
+  padding: 18px;
+  border: 1.5px dashed #a9cbbb;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f5fbf7, #edf7f1);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+#petForm .image-upload:hover,
+#petForm .image-upload:focus-visible,
+#petForm .image-upload.is-dragover {
+  border-color: var(--green2);
+  background: #eaf6ef;
+  box-shadow: 0 6px 18px rgba(31, 107, 79, .1);
+  outline: none;
+}
+
+#petForm .image-upload.is-dragover {
+  transform: scale(1.01);
+}
+
+#petForm .image-file-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+#petForm .image-upload-icon {
+  display: grid;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 15px;
+  background: #dcefe4;
+  color: var(--green);
+  font-size: 30px;
+  line-height: 1;
+}
+
+#petForm .image-upload-copy {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+  min-width: 0;
+}
+
+#petForm .image-upload-copy strong {
+  font-size: .95rem;
+  font-weight: 600;
+}
+
+#petForm .image-upload-copy small,
+#petForm .image-file-name {
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+#petForm .image-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#petForm .image-upload-button {
+  flex: 0 0 auto;
+  padding: 8px 13px;
+  border: 1px solid #c9ded2;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--green);
+  font-size: .88rem;
+  font-weight: 600;
+  transition: background .2s ease, color .2s ease;
+}
+
+#petForm .image-upload:hover .image-upload-button,
+#petForm .image-upload.is-dragover .image-upload-button {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+
+#imagePreview {
+  display: none;
+  width: min(100%, 360px);
+  max-height: 230px;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 8px 22px rgba(23, 53, 42, .1);
+}
+
+@media (max-width: 520px) {
+  #petForm .image-upload {
+    gap: 10px;
+    padding: 13px;
+  }
+
+  #petForm .image-upload-icon {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    font-size: 25px;
+  }
+
+  #petForm .image-upload-button {
+    padding: 7px 9px;
+    font-size: .8rem;
+  }
 }
 
 /* ==========================================

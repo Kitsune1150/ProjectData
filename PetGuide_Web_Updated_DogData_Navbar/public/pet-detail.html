@@ -61,7 +61,7 @@
         document.getElementById("detail").innerHTML = `
           <a id="back-to-list" href="/pets.html" class="back">← กลับไปสัตว์เลี้ยงทั้งหมด</a>
           <section class="detail-hero">
-            <img src="${safeUrl(pet.image)}" alt="${escapeHtml(pet.name)}">
+            <img src="${escapeHtml(safeUrl(pet.image))}" alt="${escapeHtml(pet.name)}">
             <div>
               <span class="badge">${escapeHtml(pet.category)}</span>
               <h1>${escapeHtml(pet.name)}</h1>

@@ -63,6 +63,7 @@
       cursor: pointer;
       color: #666;
     }
+
   </style>
 </head>
 
@@ -164,7 +165,21 @@
           <input id="food" placeholder="อาหาร" />
           <textarea id="care" placeholder="การดูแล"></textarea>
           <textarea id="specialFeatures" placeholder="ลักษณะพิเศษ"></textarea>
-          <input id="image" placeholder="URL รูปภาพ" />
+          <div class="field">
+            <label>รูปภาพสัตว์เลี้ยง</label>
+            <div id="imageDropZone" class="image-upload" role="button" tabindex="0" aria-label="เลือกหรือลากรูปภาพสัตว์เลี้ยงมาวาง">
+              <input id="imageFile" class="image-file-input" type="file" accept="image/jpeg,image/png,image/webp" />
+              <span class="image-upload-icon" aria-hidden="true">▧</span>
+              <span class="image-upload-copy">
+                <strong>ลากรูปมาวาง หรือเลือกจากเครื่อง</strong>
+                <small>JPG, PNG หรือ WebP · สูงสุด 5 MB</small>
+                <span id="imageFileName" class="image-file-name">ยังไม่ได้เลือกรูป</span>
+              </span>
+              <span class="image-upload-button">เลือกไฟล์</span>
+            </div>
+            <img id="imagePreview" alt="ตัวอย่างรูปภาพสัตว์เลี้ยง" />
+          </div>
+          <input id="image" placeholder="URL หรือ path รูปภาพ (หรือเลือกไฟล์ด้านบน)" />
 
           <label class="check">
             <input id="recommended" type="checkbox" /> แสดงเป็นสัตว์แนะนำ
@@ -352,6 +367,83 @@
       await load();         // อัปเดตตัวเลขสถิติหน้าหลัก
     }
 
+    const imageInput = document.getElementById("image");
+    const imageFileInput = document.getElementById("imageFile");
+    const imagePreview = document.getElementById("imagePreview");
+    const imageDropZone = document.getElementById("imageDropZone");
+    const imageFileName = document.getElementById("imageFileName");
+
+    function showImagePreview(src) {
+      imagePreview.style.display = src ? "block" : "none";
+      imagePreview.src = src || "";
+    }
+
+    imagePreview.addEventListener("error", () => showImagePreview(""));
+    imageInput.addEventListener("input", () => showImagePreview(imageInput.value.trim()));
+    imageDropZone.addEventListener("click", (event) => {
+      if (event.target !== imageFileInput) imageFileInput.click();
+    });
+    imageDropZone.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        imageFileInput.click();
+      }
+    });
+    ["dragenter", "dragover"].forEach((eventName) => imageDropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      imageDropZone.classList.add("is-dragover");
+    }));
+    ["dragleave", "drop"].forEach((eventName) => imageDropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      if (eventName === "drop" || !imageDropZone.contains(event.relatedTarget)) {
+        imageDropZone.classList.remove("is-dragover");
+      }
+    }));
+    imageDropZone.addEventListener("drop", (event) => {
+      const transfer = new DataTransfer();
+      [...event.dataTransfer.files].forEach((file) => transfer.items.add(file));
+      imageFileInput.files = transfer.files;
+      imageFileInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    imageFileInput.addEventListener("change", async () => {
+      const file = imageFileInput.files[0];
+      if (!file) return;
+      imageFileName.textContent = file.name;
+      if (file.size > 5 * 1024 * 1024) {
+        alert("รูปภาพต้องมีขนาดไม่เกิน 5 MB");
+        imageFileName.textContent = "ไฟล์มีขนาดเกิน 5 MB";
+        imageFileInput.value = "";
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        alert("รองรับไฟล์ JPG, PNG หรือ WebP เท่านั้น");
+        imageFileName.textContent = "ชนิดไฟล์ไม่รองรับ";
+        imageFileInput.value = "";
+        return;
+      }
+
+      try {
+        imageFileName.textContent = `กำลังอัปโหลด ${file.name}...`;
+        const imageData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("อ่านไฟล์รูปภาพไม่สำเร็จ"));
+          reader.readAsDataURL(file);
+        });
+        const uploaded = await api("/api/admin/upload-image", {
+          method: "POST",
+          body: JSON.stringify({ imageData }),
+        });
+        imageInput.value = uploaded.image;
+        showImagePreview(uploaded.image);
+        imageFileName.textContent = `อัปโหลดแล้ว: ${file.name}`;
+        imageFileInput.value = "";
+      } catch (err) {
+        imageFileName.textContent = "อัปโหลดไม่สำเร็จ";
+        alert(err.message || "อัปโหลดรูปภาพไม่สำเร็จ");
+      }
+    });
+
     petForm.onsubmit = async (e) => {
       e.preventDefault();
       const data = {};
@@ -384,6 +476,8 @@
         "size", "grooming", "lifespan", "food", "care",
         "specialFeatures", "image"
       ].forEach((x) => (document.getElementById(x).value = p[x] || ""));
+      showImagePreview(p.image || "");
+      imageFileName.textContent = p.image ? "มีรูปภาพที่บันทึกไว้แล้ว" : "ยังไม่ได้เลือกรูป";
       recommended.checked = !!p.recommended;
       scrollTo(0, 0);
     }
@@ -397,6 +491,8 @@
     function resetForm() {
       petForm.reset();
       petId.value = "";
+      showImagePreview("");
+      imageFileName.textContent = "ยังไม่ได้เลือกรูป";
       formTitle.textContent = "เพิ่มสัตว์เลี้ยง";
     }
 

@@ -1,6 +1,8 @@
 require("dotenv").config();
 
 const express = require("express");
+const fs = require("fs/promises");
+const crypto = require("crypto");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -15,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 
 let db;
 
-app.use(express.json());
+app.use(express.json({ limit: "7mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -59,6 +61,31 @@ function adminOnly(req, res, next) {
   }
   next();
 }
+
+app.post("/api/admin/upload-image", auth, adminOnly, async (req, res) => {
+  const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(req.body.imageData || "");
+  if (!match) return res.status(400).json({ message: "รองรับไฟล์ JPG, PNG หรือ WebP เท่านั้น" });
+
+  const [, mimeType, encoded] = match;
+  const imageBuffer = Buffer.from(encoded, "base64");
+  if (imageBuffer.length > 5 * 1024 * 1024) {
+    return res.status(413).json({ message: "รูปภาพต้องมีขนาดไม่เกิน 5 MB" });
+  }
+
+  const validSignature = mimeType === "jpeg"
+    ? imageBuffer[0] === 0xff && imageBuffer[1] === 0xd8 && imageBuffer[2] === 0xff
+    : mimeType === "png"
+      ? imageBuffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      : imageBuffer.toString("ascii", 0, 4) === "RIFF" && imageBuffer.toString("ascii", 8, 12) === "WEBP";
+  if (!validSignature) return res.status(400).json({ message: "ชนิดไฟล์ไม่ตรงกับข้อมูลรูปภาพ" });
+
+  const extension = mimeType === "jpeg" ? "jpg" : mimeType;
+  const filename = `${crypto.randomBytes(16).toString("hex")}.${extension}`;
+  const imageDirectory = path.join(__dirname, "public", "images");
+  await fs.mkdir(imageDirectory, { recursive: true });
+  await fs.writeFile(path.join(imageDirectory, filename), imageBuffer, { flag: "wx" });
+  res.status(201).json({ image: `/images/${filename}` });
+});
 
 // ---------- Auth ----------
 app.post("/api/auth/register", async (req, res) => {
