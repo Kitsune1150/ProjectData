@@ -74,6 +74,10 @@ async function api(url, options = {}) {
 
 // ฟังก์ชันสร้าง Card สัตว์เลี้ยง (คลิกแล้วไปหน้า pet-detail.html)
 function petCard(p) {
+  const params = new URLSearchParams({ id: p._id });
+  if (location.pathname.replace(/\/$/, "") === "/pets.html") {
+    params.set("returnTo", location.pathname + location.search);
+  }
   return `
     <div class="pet-card">
       <img src="${safeUrl(p.image)}" alt="${escapeHtml(p.name)}">
@@ -85,7 +89,7 @@ function petCard(p) {
           <span>ความยาก: ${escapeHtml(p.difficulty)}</span>
           <span>ขนาด: ${escapeHtml(p.size)}</span>
         </div>
-        <a class="btn btn-primary full" href="pet-detail.html?id=${p._id}">ดูรายละเอียด</a>
+        <a class="btn btn-primary full" href="/pet-detail.html?${params.toString()}">ดูรายละเอียด</a>
       </div>
     </div>
   `;
