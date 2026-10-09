@@ -898,3 +898,116 @@ button.danger {
   min-width: 0; /* ป้องกัน Flex/Grid Child ล้นขอบ */
   overflow: hidden;
 }
+
+/* ==========================================
+   Comprehensive Responsive Enhancements
+   ========================================== */
+
+/* 1. หน้าจอแท็บเล็ตและหน้าจอกลาง (Max-width: 992px) */
+@media (max-width: 992px) {
+  .admin-grid {
+    grid-template-columns: 1fr !important; /* สลับเป็น 1 คอลัมน์แนวตั้ง */
+    gap: 20px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr) !important; /* จัดกล่องสถิติเป็น 2x2 */
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .detail-hero {
+    grid-template-columns: 1fr !important;
+    gap: 24px;
+  }
+
+  .detail-hero img {
+    height: 300px;
+  }
+}
+
+/* 2. หน้าจอมือถือทั่วไป (Max-width: 768px) */
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .filter-box {
+    grid-template-columns: 1fr !important; /* ฟิลเตอร์เรียงต่อกันเป็นแถวเดียว */
+  }
+
+  .pet-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* ปรับฟอร์ม 2 ช่อง (เช่น ขนาด/พลังงาน) ให้กลายเป็นแถวเดียวบนมือถือ */
+  #petForm .two,
+  .two {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  /* ปรับแต่ง Modal ป๊อปอัพบนมือถือ */
+  .modal-content {
+    width: 95% !important;
+    padding: 16px !important;
+    margin: 10px;
+    max-height: 85vh !important;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+}
+
+/* 3. หน้าจอมือถือขนาดเล็ก (Max-width: 480px) */
+@media (max-width: 480px) {
+  .stats {
+    grid-template-columns: 1fr !important; /* สถิติเรียงแถวละ 1 กล่อง */
+  }
+
+  .pet-grid {
+    grid-template-columns: 1fr !important; /* สัตว์เลี้ยงเรียง 1 การ์ดต่อแถว */
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .hero h1 {
+    font-size: 32px !important;
+  }
+
+  .page-title h1 {
+    font-size: 26px !important;
+  }
+
+  .section, .container {
+    padding: 30px 15px !important;
+  }
+
+  /* ทำให้ตารางในหน้าแอดมินและป๊อปอัพใช้นิ้วปัดข้างได้สะดวก */
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  th, td {
+    padding: 8px 6px;
+    font-size: 0.85rem;
+  }
+}
