@@ -5,6 +5,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ObjectId } = require("mongodb");
+const catBreeds = require("./data/cats.json");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1041,6 +1042,11 @@ async function seed() {
       { name: "สัตว์ฟันแทะ", description: "สัตว์ฟันแทะขนาดเล็ก", createdAt: new Date() }
     ]);
   }
+  await categories.updateOne(
+    { name: "แมว" },
+    { $setOnInsert: { description: "ข้อมูลสายพันธุ์แมวสำหรับระบบแนะนำสัตว์เลี้ยง", createdAt: new Date() } },
+    { upsert: true }
+  );
 
   const users = db.collection("users");
   const adminEmail = "admin@petguide.com";
@@ -1057,20 +1063,6 @@ async function seed() {
   const pets = db.collection("pets");
   if (await pets.countDocuments() === 0) {
     await pets.insertMany([
-      {
-        name: "Maine Coon",
-        scientificName: "Felis catus",
-        category: "แมว",
-        description: "แมวขนาดใหญ่ ขนยาว และมีบุคลิกเป็นมิตร",
-        characteristics: "ตัวใหญ่ ขนยาว หางเป็นพวง ใบหูมีขน",
-        personality: "เป็นมิตร ขี้เล่น เข้ากับคนได้ดี",
-        difficulty: "ปานกลาง", energy: "ปานกลาง", size: "ใหญ่", grooming: "สูง",
-        lifespan: "12–15 ปี", food: "อาหารแมวที่มีสารอาหารครบถ้วน",
-        care: "แปรงขนสม่ำเสมอและมีพื้นที่ให้เคลื่อนไหว",
-        specialFeatures: "มีขนาดตัวใหญ่และขนยาวสวยงาม",
-        image: "https://images.unsplash.com/photo-1513245543132-31f507417b26?auto=format&fit=crop&w=900&q=80",
-        recommended: true, createdAt: new Date(), updatedAt: new Date()
-      },
       {
         name: "Golden Retriever",
         scientificName: "Canis lupus familiaris",
@@ -1115,6 +1107,15 @@ async function seed() {
       }
     ]);
   }
+
+  const now = new Date();
+  await pets.bulkWrite(catBreeds.map((cat) => ({
+    updateOne: {
+      filter: { name: cat.name, category: cat.category },
+      update: { $set: { ...cat, updatedAt: now }, $setOnInsert: { createdAt: now } },
+      upsert: true
+    }
+  })));
 }
 
 async function start() {

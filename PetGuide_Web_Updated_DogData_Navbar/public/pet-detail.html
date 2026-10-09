@@ -59,7 +59,7 @@
         document.title = pet.name + " | PetGuide";
 
         document.getElementById("detail").innerHTML = `
-          <a href="/pets.html" class="back">← กลับไปสัตว์เลี้ยงทั้งหมด</a>
+          <a id="back-to-list" href="/pets.html" class="back">← กลับไปสัตว์เลี้ยงทั้งหมด</a>
           <section class="detail-hero">
             <img src="${safeUrl(pet.image)}" alt="${escapeHtml(pet.name)}">
             <div>
@@ -88,6 +88,18 @@
             <div id="commentForm"></div>
           </section>
         `;
+
+        const returnTo = new URLSearchParams(location.search).get("returnTo");
+        if (returnTo) {
+          try {
+            const returnUrl = new URL(returnTo, location.origin);
+            if (returnUrl.origin === location.origin && returnUrl.pathname === "/pets.html") {
+              document.getElementById("back-to-list").href = returnUrl.pathname + returnUrl.search;
+            }
+          } catch {
+            // Keep the default link when the return URL is invalid.
+          }
+        }
 
         // ดึงรายการความคิดเห็นมาแสดง
         const comments = await fetchJSON("/api/pets/" + id + "/comments");

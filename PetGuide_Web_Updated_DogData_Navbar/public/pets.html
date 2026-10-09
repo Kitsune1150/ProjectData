@@ -75,6 +75,8 @@
           const v = document.getElementById(id).value;
           if (v) p.set(id, v);
         });
+        const query = p.toString();
+        history.replaceState(null, "", query ? `${location.pathname}?${query}` : location.pathname);
         const pets = await fetchJSON("/api/pets?" + p.toString());
         document.getElementById("pets").innerHTML = pets.length
           ? pets.map(petCard).join("")
@@ -86,8 +88,11 @@
         document.getElementById("category").innerHTML += cats
           .map((c) => `<option>${escapeHtml(c.name)}</option>`)
           .join("");
-        const cat = new URLSearchParams(location.search).get("category");
-        if (cat) document.getElementById("category").value = cat;
+        const filters = new URLSearchParams(location.search);
+        ["search", "category", "difficulty", "size"].forEach((id) => {
+          const value = filters.get(id);
+          if (value) document.getElementById(id).value = value;
+        });
         await loadPets();
       })();
     </script>
