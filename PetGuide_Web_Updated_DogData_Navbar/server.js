@@ -143,11 +143,13 @@ app.put("/api/categories/:id", auth, adminOnly, async (req, res) => {
   const id = new ObjectId(req.params.id);
   await db.collection("categories").updateOne(
     { _id: id },
-    { $set: {
-      name: String(req.body.name || "").trim(),
-      description: String(req.body.description || "").trim(),
-      updatedAt: new Date()
-    }}
+    {
+      $set: {
+        name: String(req.body.name || "").trim(),
+        description: String(req.body.description || "").trim(),
+        updatedAt: new Date()
+      }
+    }
   );
   res.json({ message: "แก้ไขประเภทสำเร็จ" });
 });
@@ -981,6 +983,51 @@ const samplePets = [
     "monthlyCost": "ประมาณ 4,500 – 7,500 บาท"
   }
 ];
+
+// ---------- Admin Comments ----------
+app.get("/api/admin/comments", auth, adminOnly, async (req, res) => {
+  try {
+    const comments = await db.collection("comments")
+      .find()
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // ดึงข้อมูลชื่อสัตว์เลี้ยงเพื่อแสดงผลประกอบ
+    const petIds = comments.map(c => {
+      try { return new ObjectId(c.petId); } catch { return null; }
+    }).filter(Boolean);
+
+    const pets = await db.collection("pets")
+      .find({ _id: { $in: petIds } })
+      .toArray();
+
+    const petMap = {};
+    pets.forEach(p => { petMap[p._id.toString()] = p.name; });
+
+    // รวบรวมข้อมูลส่งกลับ
+    const result = comments.map(c => ({
+      _id: c._id,
+      petName: petMap[c.petId] || "สัตว์เลี้ยง",
+      username: c.username || "ผู้ใช้งาน",
+      comment: c.comment,
+      createdAt: c.createdAt
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลความคิดเห็น" });
+  }
+});
+
+app.delete("/api/admin/comments/:id", auth, adminOnly, async (req, res) => {
+  try {
+    await db.collection("comments").deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ message: "ลบความคิดเห็นสำเร็จ" });
+  } catch (err) {
+    res.status(400).json({ message: "ID ไม่ถูกต้อง" });
+  }
+});
 
 async function seed() {
   const categories = db.collection("categories");

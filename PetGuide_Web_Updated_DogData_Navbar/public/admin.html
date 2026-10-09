@@ -6,6 +6,64 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin | PetGuide</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    /* CSS สำหรับ Pop-up Modal */
+    .stat-card.clickable {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card.clickable:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 12px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+  </style>
 </head>
 
 <body>
@@ -26,13 +84,11 @@
         </button>
 
         <div class="nav-menu">
-          <!-- เมนูหลักสำหรับ Admin -->
           <div class="nav-main">
             <a href="admin.html" class="active">จัดการสัตว์เลี้ยง</a>
             <a href="index.html" target="_blank">ดูหน้าเว็บหลัก ↗</a>
           </div>
 
-          <!-- ปุ่มออกจากระบบ -->
           <div class="nav-actions" id="nav-auth">
             <span style="font-size: 0.9rem; color: #666; margin-right: 8px;">ผู้ดูแลระบบ</span>
             <button class="btn btn-light" onclick="logout()" style="padding: 6px 12px;">ออกจากระบบ</button>
@@ -41,23 +97,31 @@
       </div>
     </nav>
   </header>
+
   <main class="container">
     <div class="page-title">
       <p class="eyebrow">ADMIN PANEL</p>
-      <h1>จัดการข้อมูลสัตว์เลี้ยง</h1>
+      <h1>จัดการข้อมูลสัตว์เลี้ยงและระบบ</h1>
     </div>
+
+    <!-- กล่องสถิติ -->
     <div id="stats" class="stats"></div>
+
     <div class="admin-grid">
+      <!-- ฟอร์มจัดการสัตว์เลี้ยง -->
       <section class="panel">
         <h2 id="formTitle">เพิ่มสัตว์เลี้ยง</h2>
         <form id="petForm">
-          <input id="petId" type="hidden" /><input id="name" placeholder="ชื่อสายพันธุ์ *" required /><input
-            id="scientificName" placeholder="ชื่อวิทยาศาสตร์" />
+          <input id="petId" type="hidden" />
+          <input id="name" placeholder="ชื่อสายพันธุ์ *" required />
+          <input id="scientificName" placeholder="ชื่อวิทยาศาสตร์" />
           <select id="category" required>
             <option value="">เลือกประเภท *</option>
           </select>
-          <textarea id="description" placeholder="คำอธิบาย"></textarea><textarea id="characteristics"
-            placeholder="ลักษณะทั่วไป"></textarea><textarea id="personality" placeholder="นิสัย"></textarea>
+          <textarea id="description" placeholder="คำอธิบาย"></textarea>
+          <textarea id="characteristics" placeholder="ลักษณะทั่วไป"></textarea>
+          <textarea id="personality" placeholder="นิสัย"></textarea>
+
           <div class="two">
             <div class="field">
               <label for="difficulty">ความยากในการเลี้ยง</label>
@@ -96,17 +160,22 @@
             </div>
           </div>
 
-          <input id="lifespan" placeholder="อายุเฉลี่ย" /><input id="food" placeholder="อาหาร" /><textarea id="care"
-            placeholder="การดูแล"></textarea><textarea id="specialFeatures" placeholder="ลักษณะพิเศษ"></textarea><input
-            id="image" placeholder="URL รูปภาพ" />
-          <label class="check"><input id="recommended" type="checkbox" />
-            แสดงเป็นสัตว์แนะนำ</label>
-          <button class="btn btn-primary">บันทึก</button><button type="button" class="btn btn-light"
-            onclick="resetForm()">
-            ล้างฟอร์ม
-          </button>
+          <input id="lifespan" placeholder="อายุเฉลี่ย" />
+          <input id="food" placeholder="อาหาร" />
+          <textarea id="care" placeholder="การดูแล"></textarea>
+          <textarea id="specialFeatures" placeholder="ลักษณะพิเศษ"></textarea>
+          <input id="image" placeholder="URL รูปภาพ" />
+
+          <label class="check">
+            <input id="recommended" type="checkbox" /> แสดงเป็นสัตว์แนะนำ
+          </label>
+
+          <button class="btn btn-primary">บันทึก</button>
+          <button type="button" class="btn btn-light" onclick="resetForm()">ล้างฟอร์ม</button>
         </form>
       </section>
+
+      <!-- ตารางแสดงรายการสัตว์เลี้ยง -->
       <section class="panel">
         <h2>รายการสัตว์เลี้ยง</h2>
         <div class="table-wrap">
@@ -125,9 +194,39 @@
       </section>
     </div>
   </main>
+
+  <!-- Pop-up Modal สำหรับแสดงรายการความคิดเห็น -->
+  <div id="commentsModal" class="modal-overlay" onclick="closeCommentsModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 style="margin: 0;">รายการความคิดเห็นทั้งหมด</h2>
+        <button class="modal-close" onclick="closeCommentsModal()">&times;</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>สัตว์เลี้ยง</th>
+              <th>ผู้ใช้งาน</th>
+              <th>ข้อความ</th>
+              <th>วันที่</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="commentRows">
+            <tr>
+              <td colspan="5" style="text-align:center;">กำลังโหลด...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/app.js"></script>
   <script>
     let pets = [];
+
     (async () => {
       const u = getUser();
       if (!u || u.role !== "admin") {
@@ -136,13 +235,24 @@
       }
       await load();
     })();
+
     async function load() {
       const s = await api("/api/admin/stats");
-      stats.innerHTML = `<div>สัตว์ทั้งหมด <b>${s.pets}</b></div><div>ประเภทสัตว์ <b>${s.categories}</b></div><div>ผู้ใช้ <b>${s.users}</b></div><div>ความคิดเห็น <b>${s.comments}</b></div>`;
+
+      // ปรับแต่ง HTML ส่วน Stats ให้กล่องความคิดเห็นกดคลิกได้ (เปิด Pop-up)
+      stats.innerHTML = `
+        <div>สัตว์ทั้งหมด <b>${s.pets}</b></div>
+        <div>ประเภทสัตว์ <b>${s.categories}</b></div>
+        <div>ผู้ใช้ <b>${s.users}</b></div>
+        <div class="stat-card clickable" onclick="openCommentsModal()" title="คลิกเพื่อดูความคิดเห็นทั้งหมด">
+          ความคิดเห็น <b>${s.comments}</b>
+        </div>`;
+
       const c = await fetchJSON("/api/categories");
       category.innerHTML =
         '<option value="">เลือกประเภท *</option>' +
         c.map((x) => `<option>${escapeHtml(x.name)}</option>`).join("");
+
       pets = await fetchJSON("/api/pets");
       rows.innerHTML = pets
         .map(
@@ -151,65 +261,125 @@
         )
         .join("");
     }
+
+    // ฟังก์ชันเปิด-ปิด Modal ความคิดเห็น
+    async function openCommentsModal() {
+      document.getElementById("commentsModal").classList.add("active");
+      await loadComments();
+    }
+
+    function closeCommentsModal(e) {
+      document.getElementById("commentsModal").classList.remove("active");
+    }
+
+    // ฟังก์ชันโหลดข้อมูลความคิดเห็นเข้ามาแสดงใน Pop-up
+    async function loadComments() {
+      try {
+        const comments = await fetchJSON("/api/admin/comments");
+        const commentRows = document.getElementById("commentRows");
+
+        if (!comments || comments.length === 0) {
+          commentRows.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีความคิดเห็นในระบบ</td></tr>';
+          return;
+        }
+
+        commentRows.innerHTML = comments
+          .map((com) => {
+            const petName = com.petId ? (com.petId.name || "สัตว์เลี้ยง") : (com.petName || "-");
+            const userName = com.userId ? (com.userId.name || com.userId.username || com.userId.email) : (com.userName || "ผู้ใช้ทั่วไป");
+            const createdDate = com.createdAt ? new Date(com.createdAt).toLocaleDateString("th-TH") : "-";
+
+            return `<tr>
+              <td><b>${escapeHtml(petName)}</b></td>
+              <td>${escapeHtml(userName)}</td>
+              <td>${escapeHtml(com.text || com.content || com.message || "")}</td>
+              <td>${createdDate}</td>
+              <td><button class="danger" onclick="deleteComment('${com._id}')">ลบ</button></td>
+            </tr>`;
+          })
+          .join("");
+      } catch (err) {
+        console.error("Failed to load comments:", err);
+      }
+    }
+
+    async function loadComments() {
+      try {
+        const comments = await fetchJSON("/api/admin/comments");
+        const commentRows = document.getElementById("commentRows");
+
+        if (!comments || comments.length === 0) {
+          commentRows.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีความคิดเห็นในระบบ</td></tr>';
+          return;
+        }
+
+        commentRows.innerHTML = comments
+          .map((com) => {
+            const createdDate = com.createdAt ? new Date(com.createdAt).toLocaleDateString("th-TH") : "-";
+
+            return `<tr>
+          <td><b>${escapeHtml(com.petName)}</b></td>
+          <td>${escapeHtml(com.username)}</td>
+          <td>${escapeHtml(com.comment || "")}</td>
+          <td>${createdDate}</td>
+          <td><button class="danger" onclick="deleteComment('${com._id}')">ลบ</button></td>
+        </tr>`;
+          })
+          .join("");
+      } catch (err) {
+        console.error("Failed to load comments:", err);
+      }
+    }
+
+    async function deleteComment(id) {
+      if (!confirm("ต้องการลบความคิดเห็นนี้หรือไม่?")) return;
+      await api("/api/admin/comments/" + id, { method: "DELETE" });
+      await loadComments(); // โหลดคอมเมนต์ใหม่ในป๊อปอัพ
+      await load();         // อัปเดตตัวเลขสถิติหน้าหลัก
+    }
+
     petForm.onsubmit = async (e) => {
       e.preventDefault();
       const data = {};
       [
-        "name",
-        "scientificName",
-        "category",
-        "description",
-        "characteristics",
-        "personality",
-        "difficulty",
-        "energy",
-        "size",
-        "grooming",
-        "lifespan",
-        "food",
-        "care",
-        "specialFeatures",
-        "image",
+        "name", "scientificName", "category", "description",
+        "characteristics", "personality", "difficulty", "energy",
+        "size", "grooming", "lifespan", "food", "care",
+        "specialFeatures", "image"
       ].forEach((x) => (data[x] = document.getElementById(x).value));
       data.recommended = recommended.checked;
       const id = petId.value;
+
       await api(id ? "/api/pets/" + id : "/api/pets", {
         method: id ? "PUT" : "POST",
         body: JSON.stringify(data),
       });
+
       alert(id ? "แก้ไขสำเร็จ" : "เพิ่มสำเร็จ");
       resetForm();
       load();
     };
+
     function editPet(id) {
       const p = pets.find((x) => x._id === id);
       petId.value = p._id;
       formTitle.textContent = "แก้ไขสัตว์เลี้ยง";
       [
-        "name",
-        "scientificName",
-        "category",
-        "description",
-        "characteristics",
-        "personality",
-        "difficulty",
-        "energy",
-        "size",
-        "grooming",
-        "lifespan",
-        "food",
-        "care",
-        "specialFeatures",
-        "image",
+        "name", "scientificName", "category", "description",
+        "characteristics", "personality", "difficulty", "energy",
+        "size", "grooming", "lifespan", "food", "care",
+        "specialFeatures", "image"
       ].forEach((x) => (document.getElementById(x).value = p[x] || ""));
       recommended.checked = !!p.recommended;
       scrollTo(0, 0);
     }
+
     async function deletePet(id) {
       if (!confirm("ต้องการลบข้อมูลนี้หรือไม่?")) return;
       await api("/api/pets/" + id, { method: "DELETE" });
       load();
     }
+
     function resetForm() {
       petForm.reset();
       petId.value = "";
@@ -223,8 +393,7 @@
         location.href = "/login.html";
       }
     }
-  </script>
-  <script>
+
     document.addEventListener("DOMContentLoaded", () => {
       const c = location.pathname.split("/").pop() || "index.html";
       document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
