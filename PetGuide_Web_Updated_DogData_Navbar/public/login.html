@@ -5,25 +5,57 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Login | PetGuide</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <style>
+      .auth-container {
+        width: min(430px, 92%);
+        margin: auto;
+      }
+      .back-top {
+        display: flex;
+        justify-content: flex-start; /* อยู่ฝั่งซ้าย */
+        margin-bottom: 12px;
+      }
+      .back-top a {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .back-top a:hover {
+        color: var(--green);
+      }
+      .text-center {
+        text-align: center;
+      }
+    </style>
   </head>
   <body class="auth-page">
-    <div class="auth-card">
-      <a class="brand" href="/">🐾 PetGuide</a>
-      <h1>เข้าสู่ระบบ</h1>
-      <p>เข้าสู่ระบบเพื่อใช้ฟังก์ชันสำหรับสมาชิก</p>
-      <form id="form">
-        <input id="email" type="email" placeholder="อีเมล" required /><input
-          id="password"
-          type="password"
-          placeholder="รหัสผ่าน"
-          required
-        /><button class="btn btn-primary">เข้าสู่ระบบ</button>
-      </form>
-      <p id="msg"></p>
-      <p>ยังไม่มีบัญชี? <a href="/register.html">สมัครสมาชิก</a></p>
-      <hr />
-      <small>Admin ทดลอง: admin@petguide.com / admin123</small>
+    <div class="auth-container">
+      <!-- ปุ่มกลับหน้าหลัก อยู่ฝั่งซ้ายเหนือการ์ด -->
+      <div class="back-top">
+        <a href="index.html">← กลับหน้าหลัก</a>
+      </div>
+
+      <div class="auth-card" style="width: 100%;">
+        <a class="brand" href="index.html">🐾 PetGuide</a>
+        <h1>เข้าสู่ระบบ</h1>
+        <p>เข้าสู่ระบบเพื่อใช้ฟังก์ชันสำหรับสมาชิก</p>
+
+        <form id="form">
+          <input id="email" type="email" placeholder="อีเมล" required />
+          <input id="password" type="password" placeholder="รหัสผ่าน" required />
+          <button class="btn btn-primary">เข้าสู่ระบบ</button>
+        </form>
+
+        <p id="msg" style="color: var(--danger); margin-top: 10px;" class="text-center"></p>
+
+        <p class="text-center">ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
+
+        <hr />
+        <small style="display: block;" class="text-center">Admin ทดลอง: admin@petguide.com / admin123</small>
+      </div>
     </div>
+
     <script src="/js/app.js"></script>
     <script>
       document.getElementById("form").onsubmit = async (e) => {
@@ -38,19 +70,11 @@
           });
           localStorage.setItem("token", r.token);
           localStorage.setItem("user", JSON.stringify(r.user));
-          location.href = r.user.role === "admin" ? "/admin.html" : "/";
+          location.href = r.user.role === "admin" ? "admin.html" : "index.html";
         } catch (e) {
           msg.textContent = e.message;
         }
       };
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const c = location.pathname.split("/").pop() || "index.html";
-        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
-          if (a.getAttribute("href") === c) a.classList.add("active");
-        });
-      });
     </script>
   </body>
 </html>

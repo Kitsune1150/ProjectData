@@ -1132,3 +1132,38 @@ start().catch(err => {
   console.error("Cannot start server:", err);
   process.exit(1);
 });
+
+// ---------- Update Profile ----------
+app.put("/api/auth/profile", auth, async (req, res) => {
+  try {
+    const newUsername = String(req.body.username || "").trim();
+    if (!newUsername) {
+      return res.status(400).json({ message: "กรุณาระบุชื่อผู้ใช้" });
+    }
+
+    // อัปเดตเฉพาะชื่อผู้ใช้ (username) โดยไม่อนุญาตให้เปลี่ยน email
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(req.user.id) },
+      { $set: { username: newUsername, updatedAt: new Date() } }
+    );
+
+    // ส่งข้อมูลผู้ใช้ฉบับอัปเดตกลับไป
+    const updatedUser = await db.collection("users").findOne(
+      { _id: new ObjectId(req.user.id) },
+      { projection: { password: 0 } }
+    );
+
+    res.json({
+      message: "อัปเดตโปรไฟล์สำเร็จ",
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        role: updatedUser.role
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์" });
+  }
+});

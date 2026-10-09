@@ -1011,3 +1011,9 @@ button.danger {
     font-size: 0.85rem;
   }
 }
+
+.back-top {
+  display: flex;
+  justify-content: flex-start; /* ย้ายไปฝั่งซ้าย */
+  margin-bottom: 12px;
+}

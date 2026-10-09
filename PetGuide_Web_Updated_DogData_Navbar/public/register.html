@@ -5,27 +5,55 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Register | PetGuide</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <style>
+      .auth-container {
+        width: min(430px, 92%);
+        margin: auto;
+      }
+      .back-top {
+        display: flex;
+        justify-content: flex-start; /* อยู่ฝั่งซ้าย */
+        margin-bottom: 12px;
+      }
+      .back-top a {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .back-top a:hover {
+        color: var(--green);
+      }
+      .text-center {
+        text-align: center;
+      }
+    </style>
   </head>
   <body class="auth-page">
-    <div class="auth-card">
-      <a class="brand" href="/">🐾 PetGuide</a>
-      <h1>สมัครสมาชิก</h1>
-      <form id="form">
-        <input id="username" placeholder="ชื่อผู้ใช้" required /><input
-          id="email"
-          type="email"
-          placeholder="อีเมล"
-          required
-        /><input
-          id="password"
-          type="password"
-          placeholder="รหัสผ่านอย่างน้อย 6 ตัว"
-          required
-        /><button class="btn btn-primary">สมัครสมาชิก</button>
-      </form>
-      <p id="msg"></p>
-      <p>มีบัญชีแล้ว? <a href="/login.html">เข้าสู่ระบบ</a></p>
+    <div class="auth-container">
+      <!-- ปุ่มกลับหน้าหลัก อยู่ฝั่งซ้ายเหนือการ์ด -->
+      <div class="back-top">
+        <a href="index.html">← กลับหน้าหลัก</a>
+      </div>
+
+      <div class="auth-card" style="width: 100%;">
+        <a class="brand" href="index.html">🐾 PetGuide</a>
+        <h1>สมัครสมาชิก</h1>
+        <p>สร้างบัญชีเพื่อเข้าใช้งานทุกฟังก์ชันของ PetGuide</p>
+
+        <form id="form">
+          <input id="username" placeholder="ชื่อผู้ใช้" required />
+          <input id="email" type="email" placeholder="อีเมล" required />
+          <input id="password" type="password" placeholder="รหัสผ่านอย่างน้อย 6 ตัว" required />
+          <button class="btn btn-primary">สมัครสมาชิก</button>
+        </form>
+
+        <p id="msg" style="color: var(--danger); margin-top: 10px;" class="text-center"></p>
+
+        <p class="text-center">มีบัญชีแล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+      </div>
     </div>
+
     <script src="/js/app.js"></script>
     <script>
       form.onsubmit = async (e) => {
@@ -40,19 +68,11 @@
             }),
           });
           alert("สมัครสมาชิกสำเร็จ");
-          location.href = "/login.html";
+          location.href = "login.html";
         } catch (e) {
           msg.textContent = e.message;
         }
       };
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const c = location.pathname.split("/").pop() || "index.html";
-        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
-          if (a.getAttribute("href") === c) a.classList.add("active");
-        });
-      });
     </script>
   </body>
 </html>
