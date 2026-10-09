@@ -853,6 +853,64 @@ button.danger {
   min-width: 125px;
 }
 
+.admin-pet-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+#petListSearch {
+  flex: 1;
+  width: auto !important;
+  min-width: 0;
+  margin: 0;
+  background: #fbfdfb !important;
+}
+
+#petListCount {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: .82rem;
+  white-space: nowrap;
+}
+
+.admin-pet-list-scroll {
+  max-height: min(65vh, 680px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.admin-pet-list-scroll table {
+  margin: 0;
+}
+
+.admin-pet-list-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f7fbf8;
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.admin-pet-list-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.admin-pet-list-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #b6cfc1;
+}
+
+.admin-pet-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: #86ad97;
+}
+
 /* 5. ปรับแต่งปุ่มแก้ไข/ลบ ให้เรียงแนวนอนสวยงาม */
 .table-wrap table td button {
   width: auto !important; /* ป้องกันปุ่มยืดขยายเต็มช่อง */
@@ -913,6 +971,173 @@ button.danger {
 }
 
 /* Image upload control in the admin pet form */
+#petForm .form-field {
+  display: grid;
+  gap: 5px;
+}
+
+#petForm .form-field > label {
+  color: var(--text);
+  font-size: .92rem;
+  font-weight: 600;
+}
+
+#petForm .form-field > small {
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.45;
+}
+
+.form-notice {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #c9ded2;
+  border-radius: 10px;
+  background: #f1f8f3;
+  color: var(--green);
+  font-size: .86rem;
+}
+
+.admin-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: max-content;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 14px 18px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1f6b4f, #174d3b);
+  box-shadow: 0 14px 36px rgba(20, 61, 45, .24);
+  color: #fff;
+  font-size: .92rem;
+  font-weight: 500;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(.98);
+  transition: opacity .22s ease, transform .22s ease, visibility .22s ease;
+  pointer-events: none;
+}
+
+.admin-toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.admin-toast.is-error {
+  background: linear-gradient(135deg, #a74444, #7b2f34);
+}
+
+.admin-toast-icon {
+  display: grid;
+  flex: 0 0 27px;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .18);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.delete-confirm-overlay {
+  z-index: 1300;
+  padding: 20px;
+  background: rgba(12, 35, 26, .5);
+  backdrop-filter: blur(4px);
+}
+
+.delete-confirm-card {
+  width: min(100%, 420px);
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, .75);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(10, 40, 28, .25);
+  text-align: center;
+  animation: delete-confirm-enter .2s ease-out;
+}
+
+.delete-confirm-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 13px;
+  place-items: center;
+  border: 7px solid #fff0ed;
+  border-radius: 50%;
+  background: #ffe3dd;
+  color: #b54436;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.delete-confirm-card h2 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.delete-confirm-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.delete-confirm-actions .btn {
+  min-width: 120px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.delete-confirm-button {
+  border: 1px solid #a83832;
+  background: #b54436;
+  color: #fff;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.delete-confirm-button:hover {
+  background: #96362c;
+  transform: translateY(-1px);
+}
+
+@keyframes delete-confirm-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 520px) {
+  .admin-toast {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+  }
+
+  .delete-confirm-card {
+    padding: 24px 18px;
+  }
+
+  .delete-confirm-actions .btn {
+    min-width: 0;
+    flex: 1;
+  }
+}
+
 #petForm .image-upload {
   position: relative;
   display: flex;
@@ -1018,6 +1243,15 @@ button.danger {
   border-radius: 14px;
   object-fit: cover;
   box-shadow: 0 8px 22px rgba(23, 53, 42, .1);
+}
+
+#removeImageButton {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+#removeImageButton[hidden] {
+  display: none;
 }
 
 @media (max-width: 520px) {

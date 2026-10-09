@@ -111,16 +111,37 @@
       <!-- ฟอร์มจัดการสัตว์เลี้ยง -->
       <section class="panel">
         <h2 id="formTitle">เพิ่มสัตว์เลี้ยง</h2>
+        <p id="formNotice" class="form-notice" hidden></p>
         <form id="petForm">
           <input id="petId" type="hidden" />
-          <input id="name" placeholder="ชื่อสายพันธุ์ *" required />
-          <input id="scientificName" placeholder="ชื่อวิทยาศาสตร์" />
-          <select id="category" required>
-            <option value="">เลือกประเภท *</option>
-          </select>
-          <textarea id="description" placeholder="คำอธิบาย"></textarea>
-          <textarea id="characteristics" placeholder="ลักษณะทั่วไป"></textarea>
-          <textarea id="personality" placeholder="นิสัย"></textarea>
+          <div class="form-field">
+            <label for="name">ชื่อสายพันธุ์ *</label>
+            <input id="name" placeholder="เช่น เปอร์เซีย" required />
+          </div>
+          <div class="form-field">
+            <label for="scientificName">ชื่อวิทยาศาสตร์</label>
+            <input id="scientificName" placeholder="เช่น Felis catus" />
+          </div>
+          <div class="form-field">
+            <label for="category">ประเภทสัตว์ *</label>
+            <select id="category" required>
+              <option value="">เลือกประเภท *</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="description">คำอธิบายโดยย่อ</label>
+            <small>สรุปภาพรวมของสายพันธุ์ ใช้แสดงใต้ชื่อบนการ์ด</small>
+            <textarea id="description" placeholder="สรุปจุดเด่นโดยรวม"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="characteristics">ลักษณะทั่วไป</label>
+            <small>รูปร่าง ขนาด สีขน หรือรายละเอียดภายนอก</small>
+            <textarea id="characteristics" placeholder="บรรยายรูปร่างและลักษณะภายนอก"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="personality">นิสัยและพฤติกรรม</label>
+            <textarea id="personality" placeholder="เช่น ร่าเริง สุขุม ชอบเล่น หรือรักอิสระ"></textarea>
+          </div>
 
           <div class="two">
             <div class="field">
@@ -160,10 +181,23 @@
             </div>
           </div>
 
-          <input id="lifespan" placeholder="อายุเฉลี่ย" />
-          <input id="food" placeholder="อาหาร" />
-          <textarea id="care" placeholder="การดูแล"></textarea>
-          <textarea id="specialFeatures" placeholder="ลักษณะพิเศษ"></textarea>
+          <div class="form-field">
+            <label for="lifespan">อายุขัยเฉลี่ย</label>
+            <input id="lifespan" placeholder="เช่น 12–15 ปี" />
+          </div>
+          <div class="form-field">
+            <label for="food">อาหารที่เหมาะสม</label>
+            <input id="food" placeholder="ระบุประเภทอาหารหรือคำแนะนำ" />
+          </div>
+          <div class="form-field">
+            <label for="care">การดูแล</label>
+            <textarea id="care" placeholder="การดูแลประจำวัน สุขภาพ หรือข้อควรระวัง"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="specialFeatures">ลักษณะเด่นเพิ่มเติม</label>
+            <small>ใส่จุดเด่นที่ยังไม่ได้กล่าวในลักษณะทั่วไป</small>
+            <textarea id="specialFeatures" placeholder="จุดเด่นเฉพาะของสายพันธุ์"></textarea>
+          </div>
           <div class="field">
             <label>รูปภาพสัตว์เลี้ยง</label>
             <div id="imageDropZone" class="image-upload" role="button" tabindex="0" aria-label="เลือกหรือลากรูปภาพสัตว์เลี้ยงมาวาง">
@@ -177,8 +211,13 @@
               <span class="image-upload-button">เลือกไฟล์</span>
             </div>
             <img id="imagePreview" alt="ตัวอย่างรูปภาพสัตว์เลี้ยง" />
+            <button id="removeImageButton" class="btn btn-light image-remove-button" type="button" hidden>ลบรูปภาพที่เลือก</button>
           </div>
-          <input id="image" placeholder="URL หรือ path รูปภาพ (หรือเลือกไฟล์ด้านบน)" />
+          <div class="form-field">
+            <label for="image">URL หรือ path รูปภาพ</label>
+            <small>ตัวอย่าง /images/persian-cat.jpg หรือเลือกไฟล์จากกล่องด้านบน</small>
+            <input id="image" placeholder="URL หรือ path รูปภาพ" />
+          </div>
 
           <label class="check">
             <input id="recommended" type="checkbox" /> แสดงเป็นสัตว์แนะนำ
@@ -192,7 +231,11 @@
       <!-- ตารางแสดงรายการสัตว์เลี้ยง -->
       <section class="panel">
         <h2>รายการสัตว์เลี้ยง</h2>
-        <div class="table-wrap">
+        <div class="admin-pet-toolbar">
+          <input id="petListSearch" type="search" placeholder="ค้นหาชื่อหรือประเภทสัตว์เลี้ยง..." aria-label="ค้นหารายการสัตว์เลี้ยง" />
+          <span id="petListCount" aria-live="polite"></span>
+        </div>
+        <div class="table-wrap admin-pet-list-scroll">
           <table>
             <thead>
               <tr>
@@ -208,6 +251,23 @@
       </section>
     </div>
   </main>
+
+  <div id="adminToast" class="admin-toast" role="status" aria-live="polite" aria-atomic="true">
+    <span id="adminToastIcon" class="admin-toast-icon" aria-hidden="true"></span>
+    <span id="adminToastMessage"></span>
+  </div>
+
+  <div id="deleteConfirmModal" class="modal-overlay delete-confirm-overlay" onclick="handleDeleteModalBackdrop(event)">
+    <section class="delete-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-describedby="deleteConfirmMessage">
+      <div class="delete-confirm-icon" aria-hidden="true">!</div>
+      <h2 id="deleteConfirmTitle">ยืนยันการลบ</h2>
+      <p id="deleteConfirmMessage">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
+      <div class="delete-confirm-actions">
+        <button id="cancelDeleteButton" type="button" class="btn btn-light" onclick="resolveDeleteConfirmation(false)">ยกเลิก</button>
+        <button id="confirmDeleteButton" type="button" class="btn delete-confirm-button" onclick="resolveDeleteConfirmation(true)">ลบรายการ</button>
+      </div>
+    </section>
+  </div>
 
   <!-- Pop-up Modal สำหรับแสดงรายการความคิดเห็น -->
   <div id="commentsModal" class="modal-overlay" onclick="closeCommentsModal(event)">
@@ -240,6 +300,49 @@
   <script src="/js/app.js"></script>
   <script>
     let pets = [];
+    let originalImagePath = "";
+    const uploadedImagePaths = new Set();
+    let adminToastTimer;
+    let activeDeleteResolver = null;
+    let deleteModalReturnFocus = null;
+
+    function confirmDelete(message) {
+      if (activeDeleteResolver) return Promise.resolve(false);
+      return new Promise((resolve) => {
+        activeDeleteResolver = resolve;
+        deleteModalReturnFocus = document.activeElement;
+        document.getElementById("deleteConfirmMessage").textContent = message;
+        document.getElementById("deleteConfirmModal").classList.add("active");
+        document.getElementById("cancelDeleteButton").focus();
+      });
+    }
+
+    function resolveDeleteConfirmation(confirmed) {
+      const modal = document.getElementById("deleteConfirmModal");
+      modal.classList.remove("active");
+      if (activeDeleteResolver) activeDeleteResolver(confirmed);
+      activeDeleteResolver = null;
+      if (deleteModalReturnFocus?.focus) deleteModalReturnFocus.focus();
+      deleteModalReturnFocus = null;
+    }
+
+    function handleDeleteModalBackdrop(event) {
+      if (event.target.id === "deleteConfirmModal") resolveDeleteConfirmation(false);
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && activeDeleteResolver) resolveDeleteConfirmation(false);
+    });
+
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("adminToast");
+      document.getElementById("adminToastMessage").textContent = message;
+      document.getElementById("adminToastIcon").textContent = type === "success" ? "✓" : "!";
+      toast.classList.toggle("is-error", type === "error");
+      toast.classList.add("is-visible");
+      clearTimeout(adminToastTimer);
+      adminToastTimer = setTimeout(() => toast.classList.remove("is-visible"), 3200);
+    }
 
     (async () => {
       const u = getUser();
@@ -268,13 +371,25 @@
         c.map((x) => `<option>${escapeHtml(x.name)}</option>`).join("");
 
       pets = await fetchJSON("/api/pets");
-      rows.innerHTML = pets
+      renderPetRows();
+    }
+
+    function renderPetRows() {
+      const search = document.getElementById("petListSearch").value.trim().toLocaleLowerCase();
+      const filteredPets = pets.filter((pet) =>
+        [pet.name, pet.scientificName, pet.category, pet.difficulty]
+          .some((value) => String(value || "").toLocaleLowerCase().includes(search)),
+      );
+      document.getElementById("petListCount").textContent = `แสดง ${filteredPets.length} จาก ${pets.length} รายการ`;
+      rows.innerHTML = filteredPets
         .map(
           (p) =>
             `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category)}</td><td>${escapeHtml(p.difficulty)}</td><td><button onclick="editPet('${p._id}')">แก้ไข</button> <button class="danger" onclick="deletePet('${p._id}')">ลบ</button></td></tr>`,
         )
         .join("");
     }
+
+    document.getElementById("petListSearch").addEventListener("input", renderPetRows);
 
     // ฟังก์ชันเปิด-ปิด Modal ความคิดเห็น
     async function openCommentsModal() {
@@ -360,7 +475,7 @@
       }
     }
     async function deleteComment(id) {
-      if (!confirm("ต้องการลบความคิดเห็นนี้หรือไม่?")) return;
+      if (!(await confirmDelete("ต้องการลบความคิดเห็นนี้หรือไม่? การดำเนินการนี้ย้อนกลับไม่ได้"))) return;
       await api("/api/admin/comments/" + id, { method: "DELETE" });
       await loadComments(); // โหลดคอมเมนต์ใหม่ในป๊อปอัพ
       await load();         // อัปเดตตัวเลขสถิติหน้าหลัก
@@ -371,6 +486,7 @@
     const imagePreview = document.getElementById("imagePreview");
     const imageDropZone = document.getElementById("imageDropZone");
     const imageFileName = document.getElementById("imageFileName");
+    const removeImageButton = document.getElementById("removeImageButton");
 
     function showImagePreview(src) {
       imagePreview.style.display = src ? "block" : "none";
@@ -378,7 +494,16 @@
     }
 
     imagePreview.addEventListener("error", () => showImagePreview(""));
-    imageInput.addEventListener("input", () => showImagePreview(imageInput.value.trim()));
+    imageInput.addEventListener("input", () => {
+      showImagePreview(imageInput.value.trim());
+      removeImageButton.hidden = !imageInput.value.trim();
+    });
+    removeImageButton.addEventListener("click", () => {
+      imageInput.value = "";
+      showImagePreview("");
+      removeImageButton.hidden = true;
+      imageFileName.textContent = "ลบรูปนี้แล้ว กดบันทึกเพื่อยืนยัน";
+    });
     imageDropZone.addEventListener("click", (event) => {
       if (event.target !== imageFileInput) imageFileInput.click();
     });
@@ -433,13 +558,22 @@
           method: "POST",
           body: JSON.stringify({ imageData }),
         });
+        uploadedImagePaths.add(uploaded.image);
         imageInput.value = uploaded.image;
         showImagePreview(uploaded.image);
+        removeImageButton.hidden = false;
         imageFileName.textContent = `อัปโหลดแล้ว: ${file.name}`;
         imageFileInput.value = "";
       } catch (err) {
         imageFileName.textContent = "อัปโหลดไม่สำเร็จ";
-        alert(err.message || "อัปโหลดรูปภาพไม่สำเร็จ");
+        if (!err.alerted) {
+          const message = err.status === 404
+            ? "ไม่พบ API อัปโหลดรูปภาพ กรุณารีสตาร์ทเซิร์ฟเวอร์ด้วย npm run dev แล้วลองใหม่"
+            : err.message === "Failed to fetch"
+              ? "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจว่าเซิร์ฟเวอร์ยังทำงานอยู่"
+              : err.message || "อัปโหลดรูปภาพไม่สำเร็จ";
+          alert(message);
+        }
       }
     });
 
@@ -460,13 +594,57 @@
         body: JSON.stringify(data),
       });
 
-      alert(id ? "แก้ไขสำเร็จ" : "เพิ่มสำเร็จ");
-      resetForm();
-      load();
+      await deleteUnusedUploadedImages(data.image);
+
+      resetForm(false);
+      await load();
+      showToast(id ? "แก้ไขข้อมูลสัตว์เลี้ยงเรียบร้อยแล้ว" : "เพิ่มสัตว์เลี้ยงเรียบร้อยแล้ว");
     };
+
+    async function deleteUnusedUploadedImages(keepPath, pathsToClean = [...uploadedImagePaths, originalImagePath]) {
+      const paths = new Set(pathsToClean);
+      for (const imagePath of paths) {
+        if (!imagePath || imagePath === keepPath || !/^\/images\/[a-f0-9]{32}\.(jpg|png|webp)$/i.test(imagePath)) continue;
+        try {
+          await api("/api/admin/upload-image", {
+            method: "DELETE",
+            body: JSON.stringify({ image: imagePath }),
+          });
+        } catch (err) {
+          console.warn("Could not remove unused uploaded image:", imagePath, err);
+        }
+      }
+      uploadedImagePaths.clear();
+      originalImagePath = keepPath || "";
+    }
 
     function editPet(id) {
       const p = pets.find((x) => x._id === id);
+      originalImagePath = p.image || "";
+      uploadedImagePaths.clear();
+      const editValues = { ...p };
+      const seenText = new Set();
+      let duplicateValueFound = false;
+      ["description", "characteristics", "specialFeatures"].forEach((field) => {
+        const value = String(editValues[field] || "").trim().replace(/\s+/g, " ");
+        if (!value) return;
+        if (seenText.has(value)) {
+          editValues[field] = "";
+          duplicateValueFound = true;
+        } else {
+          seenText.add(value);
+        }
+      });
+
+      if (editValues.scientificName?.trim() === editValues.name?.trim()) {
+        if (editValues.category === "แมว") editValues.scientificName = "Felis catus";
+        if (editValues.category === "สุนัข") editValues.scientificName = "Canis lupus familiaris";
+        duplicateValueFound = true;
+      }
+      formNotice.hidden = !duplicateValueFound;
+      formNotice.textContent = duplicateValueFound
+        ? "เว้นข้อความที่ซ้ำไว้แล้ว กรุณากรอกคำอธิบายแต่ละหัวข้อให้แตกต่างกัน"
+        : "";
       petId.value = p._id;
       formTitle.textContent = "แก้ไขสัตว์เลี้ยง";
       [
@@ -474,24 +652,37 @@
         "characteristics", "personality", "difficulty", "energy",
         "size", "grooming", "lifespan", "food", "care",
         "specialFeatures", "image"
-      ].forEach((x) => (document.getElementById(x).value = p[x] || ""));
+      ].forEach((x) => (document.getElementById(x).value = editValues[x] || ""));
       showImagePreview(p.image || "");
+      removeImageButton.hidden = !p.image;
       imageFileName.textContent = p.image ? "มีรูปภาพที่บันทึกไว้แล้ว" : "ยังไม่ได้เลือกรูป";
       recommended.checked = !!p.recommended;
       scrollTo(0, 0);
     }
 
     async function deletePet(id) {
-      if (!confirm("ต้องการลบข้อมูลนี้หรือไม่?")) return;
+      const pet = pets.find((item) => item._id === id);
+      const petName = pet?.name ? `“${pet.name}”` : "สัตว์เลี้ยงรายการนี้";
+      if (!(await confirmDelete(`ต้องการลบ ${petName} หรือไม่? การดำเนินการนี้ย้อนกลับไม่ได้`))) return;
       await api("/api/pets/" + id, { method: "DELETE" });
-      load();
+      await load();
+      showToast("ลบข้อมูลสัตว์เลี้ยงเรียบร้อยแล้ว");
     }
 
-    function resetForm() {
+    function resetForm(cleanupUploads = true) {
+      if (cleanupUploads && uploadedImagePaths.size) {
+        deleteUnusedUploadedImages("", [...uploadedImagePaths]);
+      } else {
+        uploadedImagePaths.clear();
+      }
       petForm.reset();
       petId.value = "";
+      originalImagePath = "";
       showImagePreview("");
+      removeImageButton.hidden = true;
       imageFileName.textContent = "ยังไม่ได้เลือกรูป";
+      formNotice.hidden = true;
+      formNotice.textContent = "";
       formTitle.textContent = "เพิ่มสัตว์เลี้ยง";
     }
 

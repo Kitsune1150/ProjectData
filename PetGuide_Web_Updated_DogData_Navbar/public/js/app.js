@@ -53,11 +53,27 @@ async function api(url, options = {}) {
   };
 
   const res = await fetch(url, { ...options, headers });
-  const data = await res.json().catch(() => ({}));
+  const responseText = await res.text();
+  let data = {};
+  try {
+    data = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    data = {};
+  }
 
   if (!res.ok) {
-    alert(data.message || "เกิดข้อผิดพลาด");
-    throw new Error(data.message || "เกิดข้อผิดพลาด");
+    const message = data.message || (
+      res.status === 404 && url.includes("/api/admin/upload-image")
+        ? "ไม่พบ API อัปโหลดรูปภาพ กรุณารีสตาร์ทเซิร์ฟเวอร์ด้วย npm run dev แล้วลองใหม่"
+        : res.status === 413
+          ? "ไฟล์ใหญ่เกินขนาดที่เซิร์ฟเวอร์รับได้ กรุณาเลือกรูปที่เล็กลง"
+          : `เซิร์ฟเวอร์ตอบกลับ HTTP ${res.status}`
+    );
+    alert(message);
+    const error = new Error(message);
+    error.status = res.status;
+    error.alerted = true;
+    throw error;
   }
   return data;
 }

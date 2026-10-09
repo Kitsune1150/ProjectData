@@ -82,9 +82,33 @@ app.post("/api/admin/upload-image", auth, adminOnly, async (req, res) => {
   const extension = mimeType === "jpeg" ? "jpg" : mimeType;
   const filename = `${crypto.randomBytes(16).toString("hex")}.${extension}`;
   const imageDirectory = path.join(__dirname, "public", "images");
-  await fs.mkdir(imageDirectory, { recursive: true });
-  await fs.writeFile(path.join(imageDirectory, filename), imageBuffer, { flag: "wx" });
+  try {
+    await fs.mkdir(imageDirectory, { recursive: true });
+    await fs.writeFile(path.join(imageDirectory, filename), imageBuffer, { flag: "wx" });
+  } catch (error) {
+    console.error("Image upload failed:", error);
+    return res.status(500).json({ message: "เซิร์ฟเวอร์บันทึกไฟล์รูปภาพไม่สำเร็จ" });
+  }
   res.status(201).json({ image: `/images/${filename}` });
+});
+
+app.delete("/api/admin/upload-image", auth, adminOnly, async (req, res) => {
+  const image = String(req.body.image || "");
+  const match = /^\/images\/([a-f0-9]{32}\.(?:jpg|png|webp))$/i.exec(image);
+  if (!match) return res.status(400).json({ message: "path รูปภาพไม่ถูกต้อง" });
+
+  const inUse = await db.collection("pets").countDocuments({ image });
+  if (inUse > 0) return res.status(409).json({ message: "ยังมีข้อมูลสัตว์เลี้ยงใช้งานรูปนี้อยู่" });
+
+  try {
+    await fs.unlink(path.join(__dirname, "public", "images", match[1]));
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      console.error("Image delete failed:", error);
+      return res.status(500).json({ message: "ลบไฟล์รูปภาพไม่สำเร็จ" });
+    }
+  }
+  res.json({ message: "ลบไฟล์รูปภาพสำเร็จ" });
 });
 
 // ---------- Auth ----------
