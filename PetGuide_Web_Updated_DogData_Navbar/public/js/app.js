@@ -151,7 +151,10 @@ function petCard(p) {
     <div class="pet-card">
       <img src="${escapeHtml(safeUrl(p.image))}" alt="${escapeHtml(p.name)}">
       <div class="pet-card-body">
+      <div style="display: flex; gap: 8px; margin-bottom: 8px; justify-content: space-between;">
         <span class="badge">${escapeHtml(p.category)}</span>
+        <button class="btn-remove-fav" onclick="addFavorite(event, '6abbe6a13e8893ddb938dae2', this)" title="ยกเลิกรายการโปรด">♡</button>
+      </div>
         <h3>${escapeHtml(p.name)}</h3>
         <p>${escapeHtml(breedSummaries[p.name] || `${p.name} มีลักษณะและนิสัยเฉพาะตัว เหมาะกับการเรียนรู้และดูแลให้ตรงกับความต้องการของสายพันธุ์`)}</p>
         <div class="tags">
