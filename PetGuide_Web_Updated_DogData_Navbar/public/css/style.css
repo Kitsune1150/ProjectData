@@ -59,11 +59,7 @@ nav a {
     border-bottom: 3px solid transparent
 }
 
-nav a:hover,
-nav a.active {
-    color: var(--green);
-    border-bottom-color: var(--green)
-}
+
 
 .nav-register {
     background: var(--green);
@@ -147,6 +143,12 @@ nav a.active {
 .btn-primary {
     background: var(--green);
     color: #fff
+}
+
+.btn-secondary {
+    background: var(--light);
+    color: var(--green);
+    border: 1px solid var(--green);
 }
 
 .btn-primary:hover {
@@ -675,6 +677,7 @@ button.danger {
     color: #17863f !important;
     background: #f3faf5
 }
+
 
 .site-navbar .nav-main a.active:after {
     content: "";
@@ -1391,4 +1394,521 @@ button.danger {
   display: flex;
   justify-content: flex-start; /* ย้ายไปฝั่งซ้าย */
   margin-bottom: 12px;
+}
+
+.site-navbar .nav-actions a.nav-register {
+    color: #fff !important;
+}
+
+.site-navbar .nav-actions a.nav-register:hover {
+    color: #fff !important;
+}
+
+
+.finder-quiz {
+  max-width: 680px;
+  margin: 30px auto;
+  padding: 28px;
+  border: 1px solid #e8e5df;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.quiz-progress {
+  margin-bottom: 28px;
+}
+
+.quiz-progress-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #68645e;
+  font-size: 14px;
+}
+
+.progress-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #eeeae4;
+}
+
+.progress-fill {
+  width: 10%;
+  height: 100%;
+  border-radius: 10px;
+  background: #d97736;
+  transition: width 0.25s ease;
+}
+
+.question-title {
+  margin-bottom: 8px;
+  font-size: 23px;
+  line-height: 1.5;
+}
+
+.question-description {
+  margin-bottom: 22px;
+  color: #777;
+  font-size: 14px;
+}
+
+.answer-list {
+  display: grid;
+  gap: 12px;
+}
+
+.answer-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 16px;
+  border: 1px solid #e5e1db;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.answer-option:hover {
+  border-color: #d97736;
+  background: #fffaf5;
+}
+
+.answer-option:has(input:checked) {
+  border-color: #d97736;
+  background: #fff2e7;
+}
+
+.answer-option input {
+  accent-color: #d97736;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.quiz-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.quiz-actions button {
+  min-width: 120px;
+}
+
+.match-card {
+  margin-bottom: 20px;
+}
+
+.match-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.match-percent {
+  color: #a94e1d;
+  font-weight: 700;
+}
+
+.match-reason {
+  margin-top: 10px;
+  color: #68645e;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+#retry-btn {
+  display: block;
+  margin: 24px auto;
+}
+
+@media (max-width: 600px) {
+  .finder-quiz {
+    padding: 20px 16px;
+    margin: 20px auto;
+  }
+
+  .question-title {
+    font-size: 20px;
+  }
+
+  .quiz-actions button {
+    min-width: 0;
+    flex: 1;
+  }
+}
+.pet-type-selector {
+  text-align: center;
+  margin: 24px 0;
+}
+
+.pet-type-selector h2 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+.pet-type-options {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pet-type-btn {
+  min-width: 150px;
+  padding: 14px 24px;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  background: white;
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pet-type-btn:hover {
+  border-color: #f59e0b;
+}
+
+.pet-type-btn.active {
+  border-color: #352617;
+  background: #7a4d00;
+  color: #fff;
+  font-weight: 600;
+}
+/* ==========================================
+   Pet Finder — Layout & Spacing Improvements
+   ========================================== */
+
+/* จำกัดความกว้างและลดช่องว่างของเนื้อหาหลัก */
+.container {
+  width: min(100% - 40px, 1080px);
+  margin-inline: auto;
+  padding: 30px 0 50px;
+}
+
+/* หัวข้อหน้า */
+.page-title {
+  padding: 22px 0 18px;
+  text-align: center;
+}
+
+.page-title .eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.page-title h1 {
+  margin: 0 0 10px;
+  font-size: clamp(26px, 3vw, 34px);
+  line-height: 1.4;
+}
+
+.page-title p:not(.eyebrow) {
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* ส่วนเลือกประเภทสัตว์เลี้ยง */
+.pet-type-selector {
+  margin: 12px 0 24px;
+  padding: 22px 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.pet-type-selector h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.pet-type-options {
+  gap: 12px;
+}
+
+.pet-type-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 170px;
+  min-height: 50px;
+  padding: 12px 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-weight: 500;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.pet-type-btn:hover {
+  border-color: #d97736;
+  background: #fff8f1;
+  transform: translateY(-1px);
+}
+
+/* กล่องแบบทดสอบ */
+.finder-quiz {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 36px;
+  padding: 28px 32px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 24px rgba(23, 53, 42, 0.05);
+}
+
+.quiz-progress {
+  margin-bottom: 26px;
+}
+
+.quiz-progress-top {
+  margin-bottom: 9px;
+  font-size: 13px;
+}
+
+.progress-track {
+  height: 6px;
+}
+
+.question-title {
+  margin: 0 0 8px;
+  font-size: 21px;
+  line-height: 1.55;
+}
+
+.question-description {
+  margin: 0 0 20px;
+  line-height: 1.7;
+}
+
+.answer-list {
+  gap: 10px;
+}
+
+.answer-option {
+  min-height: 54px;
+  padding: 13px 16px;
+  border-radius: 11px;
+  line-height: 1.6;
+}
+
+.quiz-actions {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #f0f2ef;
+}
+
+.quiz-actions button {
+  min-width: 125px;
+  min-height: 44px;
+}
+
+.quiz-actions button[hidden] {
+  display: none;
+}
+
+.quiz-actions #prev-btn[hidden] + #next-btn {
+  margin-left: auto;
+}
+
+/* ผลลัพธ์ */
+#result-section {
+  margin-top: 32px;
+}
+
+#result-section .page-title {
+  padding: 16px 0 24px;
+}
+
+#result-section .page-title h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  line-height: 1.5;
+}
+
+#result-section .pet-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 20px;
+}
+
+.match-card {
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgba(23, 53, 42, 0.04);
+}
+
+.match-summary {
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.match-percent {
+  font-size: 14px;
+}
+
+.match-card .pet-card {
+  height: 100%;
+}
+
+.match-card .pet-card img {
+  height: 175px;
+}
+
+.match-card .pet-card-body {
+  padding: 14px;
+}
+
+.match-card .match-reason {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+/* ซ่อนกล่องผลลัพธ์สำรองที่อยู่นอกส่วนผลลัพธ์
+   หากยังไม่ได้ลบ div id="result" ตัวที่ซ้ำ */
+main.container > #result {
+  display: none;
+}
+
+/* ปรับหน้าจอแท็บเล็ต */
+@media (max-width: 900px) {
+  .container {
+    width: min(100% - 32px, 720px);
+    padding-top: 24px;
+  }
+
+  #result-section .pet-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .finder-quiz {
+    padding: 24px;
+  }
+}
+
+/* ปรับหน้าจอมือถือ */
+@media (max-width: 600px) {
+  .container {
+    width: calc(100% - 28px);
+    padding: 16px 0 32px;
+  }
+
+  .page-title {
+    padding: 16px 0 12px;
+  }
+
+  .page-title h1 {
+    font-size: 25px;
+  }
+
+  .page-title p:not(.eyebrow) {
+    font-size: 14px;
+  }
+
+  .pet-type-selector {
+    margin: 12px 0 18px;
+    padding: 18px 14px;
+  }
+
+  .pet-type-selector h2 {
+    font-size: 16px;
+  }
+
+  .pet-type-options {
+    gap: 10px;
+  }
+
+  .pet-type-btn {
+    flex: 1;
+    min-width: 0;
+    min-height: 46px;
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+
+  .finder-quiz {
+    margin: 0 auto 26px;
+    padding: 20px 16px;
+    border-radius: 15px;
+  }
+
+  .quiz-progress {
+    margin-bottom: 22px;
+  }
+
+  .question-title {
+    font-size: 18px;
+  }
+
+  .question-description {
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+
+  .answer-list {
+    gap: 9px;
+  }
+
+  .answer-option {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .quiz-actions {
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+  }
+
+  .quiz-actions button {
+    min-width: 0;
+    flex: 1;
+    padding: 10px 12px;
+  }
+
+  #result-section {
+    margin-top: 24px;
+  }
+
+  #result-section .page-title {
+    padding: 10px 0 20px;
+  }
+
+  #result-section .page-title h2 {
+    font-size: 23px;
+  }
+
+  #result-section .pet-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .match-card {
+    padding: 12px;
+  }
+
+  .match-card .pet-card img {
+    height: 200px;
+  }
+
+  #retry-btn {
+    width: 100%;
+    max-width: 320px;
+  }
 }

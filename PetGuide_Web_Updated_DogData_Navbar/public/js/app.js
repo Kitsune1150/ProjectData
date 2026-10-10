@@ -15,6 +15,24 @@ function getUser() {
   }
 }
 
+// Keep the primary navigation state consistent across routes and aliases.
+function setActiveNav() {
+  const currentPage = location.pathname.split("/").filter(Boolean).pop() || "index.html";
+  const navPage = {
+    "recommend-cat.html": "recommend.html",
+    "pet-detail.html": "pets.html",
+  }[currentPage] || currentPage;
+
+  document.querySelectorAll(".site-navbar .nav-main a").forEach((link) => {
+    const isCurrent = new URL(link.href, location.href).pathname.split("/").pop() === navPage;
+    link.classList.toggle("active", isCurrent);
+    if (isCurrent) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+}
+
+setActiveNav();
+
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
