@@ -1,81 +1,40 @@
-﻿<!-- <!doctype html>
+﻿<!doctype html>
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>รายการโปรด | PetGuide</title>
     <link rel="stylesheet" href="/css/style.css" />
-  </head>
-  <body>
-    <header>
-      <nav class="site-navbar">
-        <div class="nav-inner">
-          <a class="brand" href="index.html"
-            ><span class="brand-mark">🐾</span
-            ><span
-              ><strong>PetGuide</strong
-              ><small>คู่มือเลือกสัตว์เลี้ยง</small></span
-            ></a
-          >
-          <button
-            class="nav-toggle"
-            type="button"
-            aria-label="เปิดเมนู"
-            onclick="document.body.classList.toggle('nav-open')"
-          >
-            <span></span><span></span><span></span>
-          </button>
-          <div class="nav-menu">
-            <div class="nav-main">
-              <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a
-              ><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a
-              ><a href="favorites.html">รายการโปรด</a>
-            </div>
-            <div class="nav-actions" id="nav-auth">
-              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a
-              ><a class="nav-register" href="register.html">สมัครสมาชิก</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </header>
-    <main class="container">
-      <div class="page-title"><h1>สัตว์เลี้ยงที่ฉันสนใจ</h1></div>
-      <div id="list" class="pet-grid"></div>
-    </main>
-    <footer>© 2026 PetGuide</footer>
-    <script src="/js/app.js"></script>
-    <script>
-      (async () => {
-        if (!getUser()) {
-          location.href = "/login.html";
-          return;
-        }
-        await loadAuthNav();
-        const p = await api("/api/favorites");
-        list.innerHTML = p.length
-          ? p.map(petCard).join("")
-          : "<div class='empty'>ยังไม่มีรายการโปรด</div>";
-      })();
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const c = location.pathname.split("/").pop() || "index.html";
-        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
-          if (a.getAttribute("href") === c) a.classList.add("active");
-        });
-      });
-    </script>
-  </body>
-</html> -->
-
-<!doctype html>
-<html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>รายการโปรด | PetGuide</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+      .pet-card {
+        position: relative;
+      }
+      /* ปุ่มกากบาทมุมขวาบน */
+      .btn-remove-fav {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: #ffffff;
+        border: none;
+        border-radius: 50%;
+        font-size: 18px;
+        font-weight: bold;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 10;
+      }
+      .btn-remove-fav:hover {
+        background-color: #e63946;
+        transform: scale(1.1);
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -109,11 +68,69 @@
     <footer>© 2026 PetGuide</footer>
     <script src="/js/app.js"></script>
     <script>
+      // ฟังก์ชัน Render การ์ดคู่กับปุ่มกากบาท
+      function renderFavoriteCard(pet) {
+        const cardContent = typeof petCard === 'function' ? petCard(pet) : `
+          <img src="${pet.image || ''}" alt="${pet.name}">
+          <div class="pet-card-body">
+            <h3>${pet.name}</h3>
+            <p>${pet.description || ''}</p>
+          </div>
+        `;
+
+        return `
+          <div class="pet-card" id="fav-card-${pet.id}">
+            <button class="btn-remove-fav" onclick="removeFavorite('${pet.id}')" title="ยกเลิกรายการโปรด">✕</button>
+            ${cardContent}
+          </div>
+        `;
+      }
+
+      // โหลดข้อมูลรายการโปรด
+      async function loadFavorites() {
+        const listEl = document.getElementById("list");
+        try {
+          const pets = await api("/api/favorites");
+          if (pets && pets.length > 0) {
+            listEl.innerHTML = pets.map(renderFavoriteCard).join("");
+          } else {
+            listEl.innerHTML = `<div class="empty" style="grid-column: 1/-1; text-align: center; padding: 40px;">ยังไม่มีรายการโปรด</div>`;
+          }
+        } catch (e) {
+          console.error(e);
+          listEl.innerHTML = `<div class="empty" style="grid-column: 1/-1; text-align: center; color: red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+        }
+      }
+
+      // ฟังก์ชันกดยกเลิกชอบ (กากบาทออก)
+      async function removeFavorite(petId) {
+        if (!confirm("ต้องการลบออกจากรายการโปรดหรือไม่?")) return;
+
+        try {
+          await api(`/api/favorites/${petId}`, { method: "DELETE" });
+
+          // ลบการ์ดออกจากหน้าจอทันที
+          const cardEl = document.getElementById(`fav-card-${petId}`);
+          if (cardEl) {
+            cardEl.remove();
+          }
+
+          // แสดงข้อความเมื่อไม่เหลือรายการโปรดแล้ว
+          const listEl = document.getElementById("list");
+          if (!listEl.querySelector(".pet-card")) {
+            listEl.innerHTML = `<div class="empty" style="grid-column: 1/-1; text-align: center; padding: 40px;">ยังไม่มีรายการโปรด</div>`;
+          }
+        } catch (e) {
+          alert("ไม่สามารถยกเลิกรายการโปรดได้ กรุณาลองใหม่อีกครั้ง");
+          console.error(e);
+        }
+      }
+
+      // เริ่มทำงานเมื่อเปิดหน้าเว็บ
       (async () => {
         await loadAuthNav();
         const user = getUser();
         
-        // ถ้าผู้ใช้ยังไม่เข้าสู่ระบบ ให้แสดงข้อความแจ้งเตือนแทนการเตะไปหน้า login
         if (!user) {
           document.getElementById("list").innerHTML = `
             <div class="empty" style="grid-column: 1/-1; text-align: center; padding: 40px;">
@@ -126,16 +143,16 @@
           return;
         }
 
-        // กรณีเข้าสู่ระบบแล้ว ให้ดึงข้อมูลรายการโปรดปกติ
-        try {
-          const p = await api("/api/favorites");
-          document.getElementById("list").innerHTML = p.length
-            ? p.map(petCard).join("")
-            : "<div class='empty' style='grid-column: 1/-1;'>ยังไม่มีรายการโปรด</div>";
-        } catch (e) {
-          console.error(e);
-        }
+        await loadFavorites();
       })();
+
+      // Active Navbar Highlight
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = location.pathname.split("/").pop() || "index.html";
+        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+          if (a.getAttribute("href") === c) a.classList.add("active");
+        });
+      });
     </script>
   </body>
 </html>
