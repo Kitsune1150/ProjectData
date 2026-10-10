@@ -1,178 +1,198 @@
 ﻿<!doctype html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>รายละเอียดสัตว์ | PetGuide</title>
-    <link rel="stylesheet" href="/css/style.css" />
-  </head>
-  <body>
-    <header>
-      <nav class="site-navbar">
-        <div class="nav-inner">
-          <a class="brand" href="index.html">
-            <span class="brand-mark">🐾</span>
-            <span>
-              <strong>PetGuide</strong>
-              <small>คู่มือเลือกสัตว์เลี้ยง</small>
-            </span>
-          </a>
-          <button
-            class="nav-toggle"
-            type="button"
-            aria-label="เปิดเมนู"
-            onclick="document.body.classList.toggle('nav-open')"
-          >
-            <span></span><span></span><span></span>
-          </button>
-          <div class="nav-menu">
-            <div class="nav-main">
-              <a href="index.html">หน้าแรก</a>
-              <a href="pets.html">สายพันธุ์</a>
-              <a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a>
-              <a href="favorites.html">รายการโปรด</a>
-            </div>
-            <div class="nav-actions" id="nav-auth">
-              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a>
-              <a class="nav-register" href="register.html">สมัครสมาชิก</a>
-            </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>รายละเอียดสัตว์ | PetGuide</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  <header>
+    <nav class="site-navbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">🐾</span>
+          <span>
+            <strong>PetGuide</strong>
+            <small>คู่มือเลือกสัตว์เลี้ยง</small>
+          </span>
+        </a>
+        <button class="nav-toggle" type="button" aria-label="เปิดเมนู"
+          onclick="document.body.classList.toggle('nav-open')">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-menu">
+          <div class="nav-main">
+            <a href="index.html">หน้าแรก</a>
+            <a href="pets.html">สายพันธุ์</a>
+            <a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a>
+            <a href="favorites.html">รายการโปรด</a>
+          </div>
+          <div class="nav-actions" id="nav-auth">
+            <a class="nav-login" href="login.html">เข้าสู่ระบบ</a>
+            <a class="nav-register" href="register.html">สมัครสมาชิก</a>
           </div>
         </div>
-      </nav>
-    </header>
+      </div>
+    </nav>
+  </header>
 
-    <main class="container" id="detail"></main>
+  <main class="container" id="detail"></main>
 
-    <footer>© 2026 PetGuide</footer>
+  <footer>© 2026 PetGuide</footer>
 
-    <script src="/js/app.js"></script>
-    <script>
-      (async () => {
-        await loadAuthNav();
-        const id = new URLSearchParams(location.search).get("id");
-        if (!id) {
-          location.href = "/pets.html";
-          return;
+  <script src="/js/app.js"></script>
+  <script>
+    function info(title, text) {
+      return `<div class="info-card"><h3>${title}</h3><p>${escapeHtml(text || "-")}</p></div>`;
+    }
+
+    // ฟังก์ชันจัดการการกดปุ่มรายการโปรดแบบไม่รีเฟรชหน้า[cite: 7]
+    async function toggleDetailFavorite(event, petId, btnEl) {
+      if (event) event.preventDefault();
+
+      if (!getUser()) {
+        if (confirm("กรุณาเข้าสู่ระบบก่อนทำการบันทึกรายการโปรด ต้องการไปหน้าเข้าสู่ระบบหรือไม่?")) {
+          location.href = "login.html";
         }
+        return;
+      }
 
-        const pet = await fetchJSON("/api/pets/" + id);
-        document.title = pet.name + " | PetGuide";
-
-        document.getElementById("detail").innerHTML = `
-          <a id="back-to-list" href="/pets.html" class="back">← กลับไปสัตว์เลี้ยงทั้งหมด</a>
-          <section class="detail-hero">
-            <img src="${escapeHtml(safeUrl(pet.image))}" alt="${escapeHtml(pet.name)}">
-            <div>
-              <span class="badge">${escapeHtml(pet.category)}</span>
-              <h1>${escapeHtml(pet.name)}</h1>
-              <p class="scientific">${escapeHtml(pet.scientificName)}</p>
-              <p>${escapeHtml(pet.description)}</p>
-              <button class="btn btn-primary" onclick="favorite('${pet._id}')">♡ เพิ่มรายการโปรด</button>
-            </div>
-          </section>
-
-          <section class="info-grid">
-            ${info("ลักษณะทั่วไป", pet.characteristics)}
-            ${info("นิสัย", pet.personality)}
-            ${info("ลักษณะพิเศษ", pet.specialFeatures)}
-            ${info("การดูแล", pet.care)}
-            ${info("อาหาร", pet.food)}
-            ${info("อายุเฉลี่ย", pet.lifespan)}
-            ${info("ความยากในการเลี้ยง", pet.difficulty)}
-            ${info("พลังงาน", pet.energy)}
-          </section>
-
-          <section class="comments">
-            <h2>ความคิดเห็น</h2>
-            <div id="comments"></div>
-            <div id="commentForm"></div>
-          </section>
-        `;
-
-        const returnTo = new URLSearchParams(location.search).get("returnTo");
-        if (returnTo) {
-          try {
-            const returnUrl = new URL(returnTo, location.origin);
-            if (returnUrl.origin === location.origin && returnUrl.pathname === "/pets.html") {
-              document.getElementById("back-to-list").href = returnUrl.pathname + returnUrl.search;
-            }
-          } catch {
-            // Keep the default link when the return URL is invalid.
-          }
-        }
-
-        // ดึงรายการความคิดเห็นมาแสดง
-        const comments = await fetchJSON("/api/pets/" + id + "/comments");
-        document.getElementById("comments").innerHTML = comments.length
-          ? comments
-              .map(
-                (c) =>
-                  `<div class="comment">
-                    <b>${escapeHtml(c.username)}</b>
-                    <span>⭐ ${c.rating || 5}</span>
-                    <p>${escapeHtml(c.comment)}</p>
-                  </div>`
-              )
-              .join("")
-          : "<p>ยังไม่มีความคิดเห็น</p>";
-
-        // ตรวจสอบสถานะการเข้าสู่ระบบสำหรับการแสดงฟอร์มคอมเมนต์
-        const me = getUser();
-        if (me) {
-          document.getElementById("commentForm").innerHTML = `
-            <textarea id="comment" placeholder="เขียนความคิดเห็นของคุณที่นี่..."></textarea>
-            <button class="btn btn-primary" onclick="comment('${id}')">ส่งความคิดเห็น</button>
-          `;
+      await toggleFavorite(event, petId, btnEl);
+      const isFav = favoriteIds.has(petId);
+      if (btnEl) {
+        if (isFav) {
+          btnEl.classList.add("active");
+          btnEl.innerText = "♥ อยู่ในรายการโปรดแล้ว";
         } else {
-          document.getElementById("commentForm").innerHTML = `
-            <div style="background: #ffffff; border: 1px solid #dce9e2; padding: 24px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              <p style="margin-bottom: 14px; color: #6d7f76; font-size: 1rem; font-weight: 500;">กรุณาเข้าสู่ระบบหรือสมัครสมาชิกเพื่อแสดงความคิดเห็น</p>
-              <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <a href="login.html" class="btn btn-primary">เข้าสู่ระบบ</a>
-                <a href="register.html" class="btn btn-light">สมัครสมาชิก</a>
-              </div>
-            </div>
-          `;
+          btnEl.classList.remove("active");
+          btnEl.innerText = "♡ เพิ่มรายการโปรด";
         }
-      })();
+      }
+    }
 
-      function info(title, text) {
-        return `<div class="info-card"><h3>${title}</h3><p>${escapeHtml(text || "-")}</p></div>`;
+    async function comment(id) {
+      const commentInput = document.getElementById("comment");
+      const text = commentInput ? commentInput.value.trim() : "";
+
+      if (!text) {
+        alert("กรุณากรอกข้อความความคิดเห็นก่อนส่ง");
+        return;
       }
 
-      async function favorite(id) {
-        if (!getUser()) {
-          if (confirm("กรุณาเข้าสู่ระบบก่อนทำการบันทึกรายการโปรด ต้องการไปหน้าเข้าสู่ระบบหรือไม่?")) {
-            location.href = "login.html";
-          }
-          return;
-        }
-        await api("/api/favorites/" + id, { method: "POST" });
-        alert("เพิ่มรายการโปรดแล้ว");
-      }
-
-      async function comment(id) {
-        const commentInput = document.getElementById("comment");
-        const comment = commentInput.value.trim();
-
-        if (!comment) {
-          alert("กรุณากรอกข้อความความคิดเห็นก่อนส่ง");
-          return;
-        }
-
-        await api("/api/pets/" + id + "/comments", {
-          method: "POST",
-          body: JSON.stringify({ comment, rating: 5 }),
-        });
-        location.reload();
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const c = location.pathname.split("/").pop() || "index.html";
-        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
-          if (a.getAttribute("href") === c) a.classList.add("active");
-        });
+      await api("/api/pets/" + id + "/comments", {
+        method: "POST",
+        body: JSON.stringify({ comment: text, rating: 5 }),
       });
-    </script>
-  </body>
+      location.reload();
+    }
+
+    (async () => {
+      loadAuthNav();
+      await loadFavoriteIds();
+
+      const id = new URLSearchParams(location.search).get("id");
+      if (!id) {
+        location.href = "/pets.html";
+        return;
+      }
+
+      const pet = await fetchJSON("/api/pets/" + id);
+      document.title = pet.name + " | PetGuide";
+
+      const isFav = favoriteIds.has(pet._id);
+      const btnText = isFav ? "♥ อยู่ในรายการโปรดแล้ว" : "♡ เพิ่มรายการโปรด";
+      const activeClass = isFav ? "active" : "";
+
+      document.getElementById("detail").innerHTML = `
+        <a id="back-to-list" href="/pets.html" class="back">← กลับไปสัตว์เลี้ยงทั้งหมด</a>
+        <section class="detail-hero">
+          <img src="${escapeHtml(safeUrl(pet.image))}" alt="${escapeHtml(pet.name)}">
+          <div>
+            <span class="badge">${escapeHtml(pet.category)}</span>
+            <h1>${escapeHtml(pet.name)}</h1>
+            <p class="scientific">${escapeHtml(pet.scientificName)}</p>
+            <p>${escapeHtml(pet.description)}</p>
+            
+            <button type="button" class="btn btn-primary btn-detail-fav ${activeClass}" onclick="toggleDetailFavorite(event, '${pet._id}', this)">
+              ${btnText}
+            </button>
+          </div>
+        </section>
+
+        <section class="info-grid">
+          ${info("ลักษณะทั่วไป", pet.characteristics)}
+          ${info("นิสัย", pet.personality)}
+          ${info("ลักษณะพิเศษ", pet.specialFeatures)}
+          ${info("การดูแล", pet.care)}
+          ${info("อาหาร", pet.food)}
+          ${info("อายุเฉลี่ย", pet.lifespan)}
+          ${info("ความยากในการเลี้ยง", pet.difficulty)}
+          ${info("พลังงาน", pet.energy)}
+        </section>
+
+        <section class="comments">
+          <h2>ความคิดเห็น</h2>
+          <div id="comments"></div>
+          <div id="commentForm"></div>
+        </section>
+      `;
+
+      // จัดการปุ่มกลับไปหน้าเดิม
+      const returnTo = new URLSearchParams(location.search).get("returnTo");
+      if (returnTo) {
+        try {
+          const returnUrl = new URL(returnTo, location.origin);
+          if (returnUrl.origin === location.origin && returnUrl.pathname === "/pets.html") {
+            document.getElementById("back-to-list").href = returnUrl.pathname + returnUrl.search;
+          }
+        } catch {}
+      }
+
+      // ดึงข้อมูลความคิดเห็น
+      const comments = await fetchJSON("/api/pets/" + id + "/comments");
+      document.getElementById("comments").innerHTML = comments.length
+        ? comments
+            .map(
+              (c) =>
+                `<div class="comment">
+                  <b>${escapeHtml(c.username)}</b>
+                  <span>⭐ ${c.rating || 5}</span>
+                  <p>${escapeHtml(c.comment)}</p>
+                </div>`
+            )
+            .join("")
+        : "<p>ยังไม่มีความคิดเห็น</p>";
+
+      // แสดงฟอร์มความคิดเห็นตามสถานะเข้าสู่ระบบ
+      const me = getUser();
+      if (me) {
+        document.getElementById("commentForm").innerHTML = `
+          <textarea id="comment" placeholder="เขียนความคิดเห็นของคุณที่นี่..."></textarea>
+          <button class="btn btn-primary" onclick="comment('${id}')">ส่งความคิดเห็น</button>
+        `;
+      } else {
+        document.getElementById("commentForm").innerHTML = `
+          <div style="background: #ffffff; border: 1px solid #dce9e2; padding: 24px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <p style="margin-bottom: 14px; color: #6d7f76; font-size: 1rem; font-weight: 500;">กรุณาเข้าสู่ระบบหรือสมัครสมาชิกเพื่อแสดงความคิดเห็น</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <a href="login.html" class="btn btn-primary">เข้าสู่ระบบ</a>
+              <a href="register.html" class="btn btn-light">สมัครสมาชิก</a>
+            </div>
+          </div>
+        `;
+      }
+    })();
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const c = location.pathname.split("/").pop() || "index.html";
+      document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+        if (a.getAttribute("href") === c) a.classList.add("active");
+      });
+    });
+  </script>
+</body>
+
 </html>

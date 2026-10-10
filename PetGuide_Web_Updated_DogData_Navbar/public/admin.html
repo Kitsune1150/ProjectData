@@ -232,9 +232,14 @@
       <!-- ตารางแสดงรายการสัตว์เลี้ยง -->
       <section class="panel">
         <h2>รายการสัตว์เลี้ยง</h2>
-        <div class="admin-pet-toolbar">
+        <div class="admin-pet-toolbar" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
           <input id="petListSearch" type="search" placeholder="ค้นหาชื่อหรือประเภทสัตว์เลี้ยง..."
-            aria-label="ค้นหารายการสัตว์เลี้ยง" />
+            aria-label="ค้นหารายการสัตว์เลี้ยง" style="flex: 1; min-width: 180px;" />
+          <select id="petListCategoryFilter" onchange="renderPetRows()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; width: 150px;">
+            <option value="">ทุกประเภท</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 8px;">
           <span id="petListCount" aria-live="polite"></span>
         </div>
         <div class="table-wrap admin-pet-list-scroll">
@@ -303,9 +308,56 @@
     </div>
   </div>
 
+  <!-- Pop-up Modal สำหรับจัดการประเภทสัตว์เลี้ยง -->
+  <div id="categoriesModal" class="modal-overlay" onclick="closeCategoriesModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 style="margin: 0;">จัดการประเภทสัตว์เลี้ยง</h2>
+        <button class="modal-close" onclick="closeCategoriesModal()">&times;</button>
+      </div>
+      
+      <!-- ฟอร์มเพิ่ม/แก้ไขประเภท -->
+      <form id="categoryForm" onsubmit="saveCategory(event)" style="background: #f8fbf9; padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e0ece6;">
+        <input type="hidden" id="catId" />
+        <div class="form-field" style="margin-bottom: 10px;">
+          <label for="catName">ชื่อประเภท *</label>
+          <input type="text" id="catName" placeholder="เช่น นก, ปลา, สัตว์เลื้อยคลาน" required />
+        </div>
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="catDescription">คำอธิบายประเภท</label>
+          <input type="text" id="catDescription" placeholder="คำอธิบายสั้นๆ เกี่ยวกับประเภทสัตว์เลี้ยง" />
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="submit" class="btn btn-primary" id="saveCatBtn">เพิ่มประเภท</button>
+          <button type="button" class="btn btn-light" id="cancelCatBtn" onclick="resetCategoryForm()" style="display: none;">ยกเลิก</button>
+        </div>
+      </form>
+
+      <!-- ตารางประเภททั้งหมด -->
+      <h3>รายการประเภททั้งหมด</h3>
+      <div class="table-wrap" style="max-height: 250px; overflow-y: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ชื่อประเภท</th>
+              <th>คำอธิบาย</th>
+              <th style="width: 120px; text-align: center;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="categoryRows">
+            <tr>
+              <td colspan="3" style="text-align:center;">กำลังโหลด...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/app.js"></script>
   <script>
     let pets = [];
+    let categoriesList = [];
     let originalImagePath = "";
     const uploadedImagePaths = new Set();
     let adminToastTimer;
@@ -362,19 +414,29 @@
     async function load() {
       const s = await api("/api/admin/stats");
 
-      // ปรับแต่ง HTML ส่วน Stats ให้กล่องความคิดเห็นกดคลิกได้ (เปิด Pop-up)
+      // ปรับแต่ง HTML ส่วน Stats ให้กดคลิกเปิด Modal ได้ทั้ง ความคิดเห็น และ ประเภทสัตว์[cite: 16]
       stats.innerHTML = `
         <div>สัตว์ทั้งหมด <b>${s.pets}</b></div>
-        <div>ประเภทสัตว์ <b>${s.categories}</b></div>
+        <div class="stat-card clickable" onclick="openCategoriesModal()" title="คลิกเพื่อจัดการประเภทสัตว์เลี้ยง">
+          ประเภทสัตว์ <b>${s.categories}</b>
+        </div>
         <div>ผู้ใช้ <b>${s.users}</b></div>
         <div class="stat-card clickable" onclick="openCommentsModal()" title="คลิกเพื่อดูความคิดเห็นทั้งหมด">
           ความคิดเห็น <b>${s.comments}</b>
         </div>`;
 
-      const c = await fetchJSON("/api/categories");
+      categoriesList = await fetchJSON("/api/categories");
+      
+      // อัปเดต Dropdown เลือกประเภทในฟอร์ม[cite: 16]
       category.innerHTML =
         '<option value="">เลือกประเภท *</option>' +
-        c.map((x) => `<option>${escapeHtml(x.name)}</option>`).join("");
+        categoriesList.map((x) => `<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`).join("");
+
+      // อัปเดต Dropdown เลือกประเภทในตัวกรองตาราง[cite: 16]
+      const filterCatSelect = document.getElementById("petListCategoryFilter");
+      filterCatSelect.innerHTML =
+        '<option value="">ทุกประเภท</option>' +
+        categoriesList.map((x) => `<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`).join("");
 
       pets = await fetchJSON("/api/pets");
       renderPetRows();
@@ -382,21 +444,29 @@
 
     function renderPetRows() {
       const search = document.getElementById("petListSearch").value.trim().toLocaleLowerCase();
-      const filteredPets = pets.filter((pet) =>
-        [pet.name, pet.scientificName, pet.category, pet.difficulty]
-          .some((value) => String(value || "").toLocaleLowerCase().includes(search)),
-      );
+      const selectedCategory = document.getElementById("petListCategoryFilter").value;
+
+      const filteredPets = pets.filter((pet) => {
+        const matchesSearch = [pet.name, pet.scientificName, pet.category, pet.difficulty]
+          .some((value) => String(value || "").toLocaleLowerCase().includes(search));
+        
+        const matchesCategory = selectedCategory ? pet.category === selectedCategory : true;
+
+        return matchesSearch && matchesCategory;
+      });
+
       document.getElementById("petListCount").textContent = `แสดง ${filteredPets.length} จาก ${pets.length} รายการ`;
-      rows.innerHTML = filteredPets
+      rows.innerHTML = filteredPets.length ? filteredPets
         .map(
           (p) =>
-            `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category)}</td><td>${escapeHtml(p.difficulty)}</td><td><button onclick="editPet('${p._id}')">แก้ไข</button> <button class="danger" onclick="deletePet('${p._id}')">ลบ</button></td></tr>`,
+            `<tr><td>${escapeHtml(p.name)}</td><td><span class="badge">${escapeHtml(p.category)}</span></td><td>${escapeHtml(p.difficulty)}</td><td><button onclick="editPet('${p._id}')">แก้ไข</button> <button class="danger" onclick="deletePet('${p._id}')">ลบ</button></td></tr>`,
         )
-        .join("");
+        .join("") : `<tr><td colspan="4" style="text-align:center;">ไม่พบข้อมูลสัตว์เลี้ยง</td></tr>`;
     }
 
     document.getElementById("petListSearch").addEventListener("input", renderPetRows);
 
+    // --- ส่วนจัดการ Modal ความคิดเห็น ---[cite: 16]
     async function openCommentsModal() {
       document.getElementById("commentsModal").classList.add("active");
       await loadComments();
@@ -406,7 +476,6 @@
       document.getElementById("commentsModal").classList.remove("active");
     }
 
-    // ฟังก์ชันโหลดข้อมูลความคิดเห็นเข้ามาแสดงใน Pop-up
     async function loadComments() {
       try {
         const commentRows = document.getElementById("commentRows");
@@ -421,11 +490,9 @@
 
         commentRows.innerHTML = comments
           .map((com) => {
-            // ดึง ID สัตว์เลี้ยง
             const rawPetId = String(com.petId?._id || com.petId || com.pet || "");
             const matchedPet = pets.find((p) => String(p._id) === rawPetId);
 
-            // ใช้ชื่อที่ส่งมาจาก Backend (com.petName) ก่อน หากไม่มีค่อยหาจากตัวแปร pets
             const petName = com.petName && com.petName !== "ไม่ทราบสายพันธุ์"
               ? com.petName
               : matchedPet
@@ -458,6 +525,100 @@
       await load();
     }
 
+    // --- ส่วนจัดการ Modal ประเภทสัตว์เลี้ยง (Categories) ---[cite: 4]
+    async function openCategoriesModal() {
+      document.getElementById("categoriesModal").classList.add("active");
+      await renderCategoryRows();
+    }
+
+    function closeCategoriesModal(e) {
+      document.getElementById("categoriesModal").classList.remove("active");
+      resetCategoryForm();
+    }
+
+    async function renderCategoryRows() {
+      const categoryRows = document.getElementById("categoryRows");
+      try {
+        categoriesList = await fetchJSON("/api/categories");
+        categoryRows.innerHTML = categoriesList.length ? categoriesList.map((c) => `
+          <tr>
+            <td><b>${escapeHtml(c.name)}</b></td>
+            <td>${escapeHtml(c.description || "-")}</td>
+            <td style="text-align:center;">
+              <button onclick="editCategory('${c._id}', '${escapeHtml(c.name)}', '${escapeHtml(c.description || "")}')">แก้ไข</button>
+              <button class="danger" onclick="deleteCategory('${c._id}')">ลบ</button>
+            </td>
+          </tr>
+        `).join("") : '<tr><td colspan="3" style="text-align:center;">ยังไม่มีประเภทสัตว์เลี้ยง</td></tr>';
+      } catch (err) {
+        console.error("Failed to load categories table:", err);
+        categoryRows.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">เกิดข้อผิดพลาดในการโหลดประเภท</td></tr>';
+      }
+    }
+
+    async function saveCategory(event) {
+      event.preventDefault();
+      const id = document.getElementById("catId").value;
+      const name = document.getElementById("catName").value.trim();
+      const description = document.getElementById("catDescription").value.trim();
+
+      if (!name) return;
+
+      try {
+        if (id) {
+          await api(`/api/categories/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({ name, description })
+          });
+          showToast("แก้ไขประเภทสัตว์เลี้ยงสำเร็จ");
+        } else {
+          await api("/api/categories", {
+            method: "POST",
+            body: JSON.stringify({ name, description })
+          });
+          showToast("เพิ่มประเภทสัตว์เลี้ยงสำเร็จ");
+        }
+
+        resetCategoryForm();
+        await renderCategoryRows();
+        await load(); // อัปเดตสถิติและ Dropdown หลัก
+      } catch (err) {
+        console.error("Failed to save category:", err);
+      }
+    }
+
+    function editCategory(id, name, description) {
+      document.getElementById("catId").value = id;
+      document.getElementById("catName").value = name;
+      document.getElementById("catDescription").value = description;
+
+      document.getElementById("saveCatBtn").textContent = "แก้ไขประเภท";
+      document.getElementById("cancelCatBtn").style.display = "inline-block";
+    }
+
+    function resetCategoryForm() {
+      document.getElementById("catId").value = "";
+      document.getElementById("catName").value = "";
+      document.getElementById("catDescription").value = "";
+
+      document.getElementById("saveCatBtn").textContent = "เพิ่มประเภท";
+      document.getElementById("cancelCatBtn").style.display = "none";
+    }
+
+    async function deleteCategory(id) {
+      if (!(await confirmDelete("ต้องการลบประเภทสัตว์เลี้ยงนี้หรือไม่?"))) return;
+
+      try {
+        await api(`/api/categories/${id}`, { method: "DELETE" });
+        showToast("ลบประเภทสัตว์เลี้ยงสำเร็จ");
+        await renderCategoryRows();
+        await load();
+      } catch (err) {
+        console.error("Failed to delete category:", err);
+      }
+    }
+
+    // --- ส่วนการจัดการรูปภาพและการส่งฟอร์มสัตว์เลี้ยง ---[cite: 16]
     const imageInput = document.getElementById("image");
     const imageFileInput = document.getElementById("imageFile");
     const imagePreview = document.getElementById("imagePreview");
