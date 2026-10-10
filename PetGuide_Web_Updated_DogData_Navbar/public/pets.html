@@ -1,4 +1,5 @@
-﻿<!doctype html>
+﻿<!-- pets.html (ฉบับแก้ไขรวมสคริปต์) -->
+<!doctype html>
 <html lang="th">
 
 <head>
@@ -12,25 +13,30 @@
   <header>
     <nav class="site-navbar">
       <div class="nav-inner">
-        <a class="brand" href="index.html"><span
-            class="brand-mark">🐾</span><span><strong>PetGuide</strong><small>คู่มือเลือกสัตว์เลี้ยง</small></span></a>
+        <a class="brand" href="index.html">
+          <span class="brand-mark">🐾</span>
+          <span><strong>PetGuide</strong><small>คู่มือเลือกสัตว์เลี้ยง</small></span>
+        </a>
         <button class="nav-toggle" type="button" aria-label="เปิดเมนู"
           onclick="document.body.classList.toggle('nav-open')">
           <span></span><span></span><span></span>
         </button>
         <div class="nav-menu">
           <div class="nav-main">
-            <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a><a
-              href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a><a href="favorites.html">รายการโปรด</a>
+            <a href="index.html">หน้าแรก</a>
+            <a href="pets.html">สายพันธุ์</a>
+            <a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a>
+            <a href="favorites.html">รายการโปรด</a>
           </div>
           <div class="nav-actions" id="nav-auth">
-            <a class="nav-login" href="login.html">เข้าสู่ระบบ</a><a class="nav-register"
-              href="register.html">สมัครสมาชิก</a>
+            <a class="nav-login" href="login.html">เข้าสู่ระบบ</a>
+            <a class="nav-register" href="register.html">สมัครสมาชิก</a>
           </div>
         </div>
       </div>
     </nav>
   </header>
+
   <main class="container">
     <div class="page-title">
       <p class="eyebrow">BREED LIBRARY</p>
@@ -58,7 +64,9 @@
     </div>
     <div id="pets" class="pet-grid"></div>
   </main>
+
   <footer>© 2026 PetGuide</footer>
+
   <script src="/js/app.js"></script>
   <script>
     async function loadPets() {
@@ -74,45 +82,31 @@
         ? pets.map(petCard).join("")
         : "<div class='empty'>ไม่พบข้อมูลสัตว์เลี้ยง</div>";
     }
+
     (async () => {
-      await loadAuthNav();
+      loadAuthNav();
+      await loadFavoriteIds();
+
       const cats = await fetchJSON("/api/categories");
-      document.getElementById("category").innerHTML += cats
-        .map((c) => `<option>${escapeHtml(c.name)}</option>`)
+      document.getElementById("category").innerHTML = `<option value="">ทุกประเภท</option>` + cats
+        .map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`)
         .join("");
+
       const filters = new URLSearchParams(location.search);
       ["search", "category", "difficulty", "size"].forEach((id) => {
         const value = filters.get(id);
         if (value) document.getElementById(id).value = value;
       });
+
       await loadPets();
     })();
-  </script>
-  <script>
+
     document.addEventListener("DOMContentLoaded", () => {
       const c = location.pathname.split("/").pop() || "index.html";
       document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
         if (a.getAttribute("href") === c) a.classList.add("active");
       });
     });
-
-    (async () => {
-      await loadAuthNav();
-      await loadFavoriteIds(); // <--- เรียกดึงข้อมูลรายการโปรดก่อนแสดงผลสัตว์เลี้ยง
-
-      const cats = await fetchJSON("/api/categories");
-      document.getElementById("category").innerHTML += cats
-        .map((c) => `<option>${escapeHtml(c.name)}</option>`)
-        .join("");
-
-      const filters = new URLSearchParams(location.search);
-      ["search", "category", "difficulty", "size"].forEach((id) => {
-        const value = filters.get(id);
-        if (value) document.getElementById(id).value = value;
-      });
-
-      await loadPets();
-    })();
   </script>
 </body>
 
