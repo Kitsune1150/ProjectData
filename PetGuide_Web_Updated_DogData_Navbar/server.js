@@ -1037,6 +1037,7 @@ const samplePets = [
 ];
 
 // ---------- Admin Comments ----------
+// ---------- Admin Comments ----------
 app.get("/api/admin/comments", auth, adminOnly, async (req, res) => {
   try {
     const comments = await db.collection("comments")
@@ -1044,30 +1045,39 @@ app.get("/api/admin/comments", auth, adminOnly, async (req, res) => {
       .sort({ createdAt: -1 })
       .toArray();
 
-    // ดึงข้อมูลชื่อสัตว์เลี้ยงเพื่อแสดงผลประกอบ
-    const petIds = comments.map(c => {
-      try { return new ObjectId(c.petId); } catch { return null; }
-    }).filter(Boolean);
-
-    const pets = await db.collection("pets")
-      .find({ _id: { $in: petIds } })
-      .toArray();
-
+    // ดึงรายชื่อสัตว์เลี้ยงทั้งหมดมาทำ Map เปรียบเทียบ
+    const allPets = await db.collection("pets").find().toArray();
     const petMap = {};
-    pets.forEach(p => { petMap[p._id.toString()] = p.name; });
+    allPets.forEach(p => {
+      petMap[p._id.toString()] = p.name;
+    });
 
-    // รวบรวมข้อมูลส่งกลับ
-    const result = comments.map(c => ({
-      _id: c._id,
-      petName: petMap[c.petId] || "สัตว์เลี้ยง",
-      username: c.username || "ผู้ใช้งาน",
-      comment: c.comment,
-      createdAt: c.createdAt
-    }));
+    // ดึงรายชื่อผู้ใช้มาทำ Map
+    const allUsers = await db.collection("users").find().toArray();
+    const userMap = {};
+    allUsers.forEach(u => {
+      userMap[u._id.toString()] = u.username || u.name || u.email;
+    });
+
+    // แมปข้อมูลส่งกลับ
+    const result = comments.map(c => {
+      const pKey = String(c.petId || "");
+      const uKey = String(c.userId || "");
+
+      return {
+        _id: c._id,
+        petId: c.petId,
+        petName: petMap[pKey] || c.petName || c.pet_name || "ไม่ทราบสายพันธุ์",
+        userId: c.userId,
+        username: c.username || userMap[uKey] || "ผู้ใช้ทั่วไป",
+        comment: c.comment || c.text || "",
+        createdAt: c.createdAt
+      };
+    });
 
     res.json(result);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching comments:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลความคิดเห็น" });
   }
 });
@@ -1219,3 +1229,5 @@ app.put("/api/auth/profile", auth, async (req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์" });
   }
 });
+
+

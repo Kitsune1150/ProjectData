@@ -211,7 +211,8 @@
               <span class="image-upload-button">เลือกไฟล์</span>
             </div>
             <img id="imagePreview" alt="ตัวอย่างรูปภาพสัตว์เลี้ยง" />
-            <button id="removeImageButton" class="btn btn-light image-remove-button" type="button" hidden>ลบรูปภาพที่เลือก</button>
+            <button id="removeImageButton" class="btn btn-light image-remove-button" type="button"
+              hidden>ลบรูปภาพที่เลือก</button>
           </div>
           <div class="form-field">
             <label for="image">URL หรือ path รูปภาพ</label>
@@ -232,7 +233,8 @@
       <section class="panel">
         <h2>รายการสัตว์เลี้ยง</h2>
         <div class="admin-pet-toolbar">
-          <input id="petListSearch" type="search" placeholder="ค้นหาชื่อหรือประเภทสัตว์เลี้ยง..." aria-label="ค้นหารายการสัตว์เลี้ยง" />
+          <input id="petListSearch" type="search" placeholder="ค้นหาชื่อหรือประเภทสัตว์เลี้ยง..."
+            aria-label="ค้นหารายการสัตว์เลี้ยง" />
           <span id="petListCount" aria-live="polite"></span>
         </div>
         <div class="table-wrap admin-pet-list-scroll">
@@ -257,14 +259,18 @@
     <span id="adminToastMessage"></span>
   </div>
 
-  <div id="deleteConfirmModal" class="modal-overlay delete-confirm-overlay" onclick="handleDeleteModalBackdrop(event)">
-    <section class="delete-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-describedby="deleteConfirmMessage">
+  <div id="deleteConfirmModal" class="modal-overlay delete-confirm-overlay" style="z-index: 2000;"
+    onclick="handleDeleteModalBackdrop(event)">
+    <section class="delete-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle"
+      aria-describedby="deleteConfirmMessage">
       <div class="delete-confirm-icon" aria-hidden="true">!</div>
       <h2 id="deleteConfirmTitle">ยืนยันการลบ</h2>
       <p id="deleteConfirmMessage">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
       <div class="delete-confirm-actions">
-        <button id="cancelDeleteButton" type="button" class="btn btn-light" onclick="resolveDeleteConfirmation(false)">ยกเลิก</button>
-        <button id="confirmDeleteButton" type="button" class="btn delete-confirm-button" onclick="resolveDeleteConfirmation(true)">ลบรายการ</button>
+        <button id="cancelDeleteButton" type="button" class="btn btn-light"
+          onclick="resolveDeleteConfirmation(false)">ยกเลิก</button>
+        <button id="confirmDeleteButton" type="button" class="btn delete-confirm-button"
+          onclick="resolveDeleteConfirmation(true)">ลบรายการ</button>
       </div>
     </section>
   </div>
@@ -391,7 +397,6 @@
 
     document.getElementById("petListSearch").addEventListener("input", renderPetRows);
 
-    // ฟังก์ชันเปิด-ปิด Modal ความคิดเห็น
     async function openCommentsModal() {
       document.getElementById("commentsModal").classList.add("active");
       await loadComments();
@@ -404,8 +409,10 @@
     // ฟังก์ชันโหลดข้อมูลความคิดเห็นเข้ามาแสดงใน Pop-up
     async function loadComments() {
       try {
-        const comments = await fetchJSON("/api/admin/comments");
         const commentRows = document.getElementById("commentRows");
+        commentRows.innerHTML = '<tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr>';
+
+        const comments = await api("/api/admin/comments");
 
         if (!comments || comments.length === 0) {
           commentRows.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีความคิดเห็นในระบบ</td></tr>';
@@ -414,14 +421,25 @@
 
         commentRows.innerHTML = comments
           .map((com) => {
-            const petName = com.petId ? (com.petId.name || "สัตว์เลี้ยง") : (com.petName || "-");
-            const userName = com.userId ? (com.userId.name || com.userId.username || com.userId.email) : (com.userName || "ผู้ใช้ทั่วไป");
+            // ดึง ID สัตว์เลี้ยง
+            const rawPetId = String(com.petId?._id || com.petId || com.pet || "");
+            const matchedPet = pets.find((p) => String(p._id) === rawPetId);
+
+            // ใช้ชื่อที่ส่งมาจาก Backend (com.petName) ก่อน หากไม่มีค่อยหาจากตัวแปร pets
+            const petName = com.petName && com.petName !== "ไม่ทราบสายพันธุ์"
+              ? com.petName
+              : matchedPet
+                ? matchedPet.name
+                : "ไม่ทราบสายพันธุ์";
+
+            const userName = com.username || com.userName || "ผู้ใช้ทั่วไป";
+            const commentText = com.comment || com.text || com.content || com.message || "";
             const createdDate = com.createdAt ? new Date(com.createdAt).toLocaleDateString("th-TH") : "-";
 
             return `<tr>
               <td><b>${escapeHtml(petName)}</b></td>
               <td>${escapeHtml(userName)}</td>
-              <td>${escapeHtml(com.text || com.content || com.message || "")}</td>
+              <td>${escapeHtml(commentText)}</td>
               <td>${createdDate}</td>
               <td><button class="danger" onclick="deleteComment('${com._id}')">ลบ</button></td>
             </tr>`;
@@ -429,56 +447,15 @@
           .join("");
       } catch (err) {
         console.error("Failed to load comments:", err);
+        document.getElementById("commentRows").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
       }
     }
 
-    async function loadComments() {
-      const tbody = document.getElementById("commentsList") || document.querySelector("#commentsModal tbody");
-      if (!tbody) return;
-
-      try {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr>`;
-
-        const comments = await api("/api/admin/comments");
-
-        if (!Array.isArray(comments)) {
-          throw new Error(comments.message || "ไม่สามารถโหลดข้อมูลความคิดเห็นได้");
-        }
-
-        if (comments.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">ยังไม่มีความคิดเห็นในระบบ</td></tr>`;
-          return;
-        }
-
-        // ปรับแก้ส่วนดึงข้อความความคิดเห็นให้รองรับทุกชื่อ field (comment / text / content / message / detail / body)
-        tbody.innerHTML = comments.map(c => {
-          const commentText = c.comment || c.text || c.content || c.message || c.detail || c.body || "-";
-          const petName = c.petName || c.pet?.name || (typeof c.pet === "string" ? c.pet : "-");
-          const username = c.username || c.user?.username || (typeof c.user === "string" ? c.user : "-");
-
-          return `
-        <tr>
-          <td>${escapeHtml(petName)}</td>
-          <td>${escapeHtml(username)}</td>
-          <td>${escapeHtml(commentText)}</td>
-          <td>${c.createdAt ? new Date(c.createdAt).toLocaleDateString("th-TH") : "-"}</td>
-          <td>
-            <button class="btn btn-sm btn-danger" onclick="deleteComment('${c._id}')">ลบ</button>
-          </td>
-        </tr>
-      `;
-        }).join("");
-
-      } catch (err) {
-        console.error("Failed to load comments:", err);
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">เกิดข้อผิดพลาด: ${escapeHtml(err.message)}</td></tr>`;
-      }
-    }
     async function deleteComment(id) {
       if (!(await confirmDelete("ต้องการลบความคิดเห็นนี้หรือไม่? การดำเนินการนี้ย้อนกลับไม่ได้"))) return;
       await api("/api/admin/comments/" + id, { method: "DELETE" });
-      await loadComments(); // โหลดคอมเมนต์ใหม่ในป๊อปอัพ
-      await load();         // อัปเดตตัวเลขสถิติหน้าหลัก
+      await loadComments();
+      await load();
     }
 
     const imageInput = document.getElementById("image");
