@@ -217,3 +217,90 @@ function logout() {
     location.href = "login.html";
   }
 }
+
+
+// ตัวแปรเก็บ ID สัตว์เลี้ยงที่เป็นรายการโปรด
+let favoriteIds = new Set();
+
+// ฟังก์ชันดึงรายการโปรดทั้งหมดของผู้ใช้
+async function loadFavoriteIds() {
+  if (!getUser()) return;
+  try {
+    const favorites = await api("/api/favorites");
+    favoriteIds = new Set(favorites.map((p) => p._id || p.id));
+  } catch (e) {
+    console.error("Failed to fetch favorites:", e);
+  }
+}
+
+// ปรับฟังก์ชัน petCard ให้ตรวจเช็กว่า p._id อยู่ใน favoriteIds หรือไม่
+function petCard(p) {
+  const params = new URLSearchParams({ id: p._id });
+  if (location.pathname.replace(/\/$/, "") === "/pets.html") {
+    params.set("returnTo", location.pathname + location.search);
+  }
+
+  // ตรวจสอบว่าสัตว์เลี้ยงตัวนี้เป็นรายการโปรดแล้วหรือยัง
+  const isFav = favoriteIds.has(p._id);
+  const activeClass = isFav ? "active" : "";
+  const heartIcon = isFav ? "♥" : "♡";
+
+  return `
+    <div class="pet-card">
+      <img src="${escapeHtml(safeUrl(p.image))}" alt="${escapeHtml(p.name)}">
+      <div class="pet-card-body">
+        <div style="display: flex; gap: 8px; margin-bottom: 8px; justify-content: space-between; align-items: center;">
+          <span class="badge">${escapeHtml(p.category)}</span>
+          <button class="btn-fav ${activeClass}" onclick="toggleFavorite(event, '${p._id}', this)" title="รายการโปรด">
+            ${heartIcon}
+          </button>
+        </div>
+        <h3>${escapeHtml(p.name)}</h3>
+        <p>${escapeHtml(breedSummaries[p.name] || `${p.name} มีลักษณะและนิสัยเฉพาะตัว เหมาะกับการเรียนรู้และดูแลให้ตรงกับความต้องการของสายพันธุ์`)}</p>
+        <div class="tags">
+          <span>ความยาก: ${escapeHtml(p.difficulty)}</span>
+          <span>ขนาด: ${escapeHtml(p.size)}</span>
+        </div>
+        <a class="btn btn-primary full" href="/pet-detail.html?${params.toString()}">ดูรายละเอียด</a>
+      </div>
+    </div>
+  `;
+}
+
+// ฟังก์ชันกดปุ่มหัวใจ (สลับสถานะ เพิ่ม / ลบ)
+async function toggleFavorite(event, petId, btnEl) {
+  if (event) event.stopPropagation();
+
+  if (!getUser()) {
+    if (confirm("กรุณาเข้าสู่ระบบก่อนทำการบันทึกรายการโปรด ต้องการไปหน้าเข้าสู่ระบบหรือไม่?")) {
+      location.href = "login.html";
+    }
+    return;
+  }
+
+  const isFav = favoriteIds.has(petId);
+
+  try {
+    if (isFav) {
+      // ถ้านำออกจากรายการโปรด
+      await api(`/api/favorites/${petId}`, { method: "DELETE" });
+      favoriteIds.delete(petId);
+      if (btnEl) {
+        btnEl.classList.remove("active");
+        btnEl.innerHTML = "♡";
+      }
+    } else {
+      // ถ้าเพิ่มเข้าในรายการโปรด
+      await api(`/api/favorites/${petId}`, { method: "POST" });
+      favoriteIds.add(petId);
+      if (btnEl) {
+        btnEl.classList.add("active");
+        btnEl.innerHTML = "♥";
+      }
+      // หากต้องการให้พากลับไปหน้า favorites.html ทันทีหลังจากกด สามารถเปิดใช้บรรทัดล่างนี้ได้ครับ:
+      // location.href = "favorites.html";
+    }
+  } catch (error) {
+    console.error("Error toggling favorite:", error);
+  }
+}

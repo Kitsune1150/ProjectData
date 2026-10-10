@@ -10,13 +10,10 @@
     <header>
       <nav class="site-navbar">
         <div class="nav-inner">
-          <a class="brand" href="index.html"
-            ><span class="brand-mark">🐾</span
-            ><span
-              ><strong>PetGuide</strong
-              ><small>คู่มือเลือกสัตว์เลี้ยง</small></span
-            ></a
-          >
+          <a class="brand" href="index.html">
+            <span class="brand-mark">🐾</span>
+            <span><strong>PetGuide</strong><small>คู่มือเลือกสัตว์เลี้ยง</small></span>
+          </a>
           <button
             class="nav-toggle"
             type="button"
@@ -27,13 +24,14 @@
           </button>
           <div class="nav-menu">
             <div class="nav-main">
-              <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a
-              ><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a
-              ><a href="favorites.html">รายการโปรด</a>
+              <a href="index.html">หน้าแรก</a>
+              <a href="pets.html">สายพันธุ์</a>
+              <a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a>
+              <a href="favorites.html">รายการโปรด</a>
             </div>
             <div class="nav-actions" id="nav-auth">
-              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a
-              ><a class="nav-register" href="register.html">สมัครสมาชิก</a>
+              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a>
+              <a class="nav-register" href="register.html">สมัครสมาชิก</a>
             </div>
           </div>
         </div>
@@ -51,9 +49,7 @@
           </p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="/pets.html">สำรวจสัตว์เลี้ยง</a>
-            <a class="btn btn-light" href="/recommend.html"
-              >ค้นหาสัตว์ที่เหมาะกับฉัน</a
-            >
+            <a class="btn btn-light" href="/recommend.html">ค้นหาสัตว์ที่เหมาะกับฉัน</a>
           </div>
         </div>
         <div class="hero-art">🐶<span>🐱</span><small>🐰</small></div>
@@ -82,24 +78,48 @@
     </main>
 
     <footer>© 2026 PetGuide — Pet Information Website</footer>
+    
     <script src="/js/app.js"></script>
     <script>
       (async () => {
-        await loadAuthNav();
-        const pets = await fetchJSON("/api/pets/recommended/list");
-        document.getElementById("recommended").innerHTML = pets
-          .map(petCard)
-          .join("");
-        const cats = await fetchJSON("/api/categories");
-        document.getElementById("categories").innerHTML = cats
-          .map(
-            (c) =>
-              `<a class="category-card" href="/pets.html?category=${encodeURIComponent(c.name)}"><span>🐾</span><h3>${escapeHtml(c.name)}</h3><p>${escapeHtml(c.description || "")}</p></a>`,
-          )
-          .join("");
+        // 1. แสดงเมนูเข้าสู่ระบบ / โปรไฟล์
+        loadAuthNav();
+
+        // 2. ดึงรายการโปรดของผู้ใช้มาก่อนเพื่อให้การ์ดแสดงหัวใจได้ถูกต้อง
+        await loadFavoriteIds();
+
+        // 3. ดึงและแสดงรายการสัตว์เลี้ยงแนะนำ[cite: 4, 8]
+        try {
+          const pets = await fetchJSON("/api/pets/recommended/list");
+          document.getElementById("recommended").innerHTML = (pets && pets.length)
+            ? pets.map(petCard).join("")
+            : "<div class='empty'>ไม่พบข้อมูลสัตว์เลี้ยงแนะนำ</div>";
+        } catch (err) {
+          console.error("Error loading recommended pets:", err);
+          document.getElementById("recommended").innerHTML = "<div class='empty'>เกิดข้อผิดพลาดในการโหลดข้อมูลสัตว์เลี้ยง</div>";
+        }
+
+        // 4. ดึงและแสดงหมวดหมู่สัตว์เลี้ยง[cite: 4, 8]
+        try {
+          const cats = await fetchJSON("/api/categories");
+          document.getElementById("categories").innerHTML = (cats && cats.length)
+            ? cats
+                .map(
+                  (c) =>
+                    `<a class="category-card" href="/pets.html?category=${encodeURIComponent(c.name)}">
+                      <span>🐾</span>
+                      <h3>${escapeHtml(c.name)}</h3>
+                      <p>${escapeHtml(c.description || "")}</p>
+                    </a>`
+                )
+                .join("")
+            : "<div class='empty'>ไม่พบประเภทสัตว์เลี้ยง</div>";
+        } catch (err) {
+          console.error("Error loading categories:", err);
+        }
       })();
-    </script>
-    <script>
+
+      // ไฮไลต์เมนูตามหน้าปัจจุบัน
       document.addEventListener("DOMContentLoaded", () => {
         const c = location.pathname.split("/").pop() || "index.html";
         document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
