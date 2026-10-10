@@ -1,115 +1,576 @@
 ﻿<!doctype html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ค้นหาสัตว์ที่เหมาะกับฉัน | PetGuide</title>
-    <link rel="stylesheet" href="/css/style.css" />
-  </head>
-  <body>
-    <header>
-      <nav class="site-navbar">
-        <div class="nav-inner">
-          <a class="brand" href="index.html"
-            ><span class="brand-mark">🐾</span
-            ><span
-              ><strong>PetGuide</strong
-              ><small>คู่มือเลือกสัตว์เลี้ยง</small></span
-            ></a
-          >
-          <button
-            class="nav-toggle"
-            type="button"
-            aria-label="เปิดเมนู"
-            onclick="document.body.classList.toggle('nav-open')"
-          >
-            <span></span><span></span><span></span>
-          </button>
-          <div class="nav-menu">
-            <div class="nav-main">
-              <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a
-              ><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a
-              ><a href="favorites.html">รายการโปรด</a>
-            </div>
-            <div class="nav-actions" id="nav-auth">
-              <a class="nav-login" href="login.html">เข้าสู่ระบบ</a
-              ><a class="nav-register" href="register.html">สมัครสมาชิก</a>
-            </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ค้นหาสัตว์ที่เหมาะกับฉัน | PetGuide</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  <header>
+    <nav class="site-navbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html"><span
+            class="brand-mark">🐾</span><span><strong>PetGuide</strong><small>คู่มือเลือกสัตว์เลี้ยง</small></span></a>
+        <button class="nav-toggle" type="button" aria-label="เปิดเมนู"
+          onclick="document.body.classList.toggle('nav-open')">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-menu">
+          <div class="nav-main">
+            <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a><a
+              href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a><a href="favorites.html">รายการโปรด</a>
+          </div>
+          <div class="nav-actions" id="nav-auth">
+            <a class="nav-login" href="login.html">เข้าสู่ระบบ</a><a class="nav-register"
+              href="register.html">สมัครสมาชิก</a>
           </div>
         </div>
-      </nav>
-    </header>
-    <main class="container">
-      <div class="page-title">
-        <p class="eyebrow">PET FINDER</p>
-        <h1>สัตว์เลี้ยงที่เหมาะกับฉัน</h1>
-        <p>ตอบคำถามสั้น ๆ แล้วระบบจะกรองสัตว์เลี้ยงตามความต้องการของคุณ</p>
       </div>
-      <div class="finder">
-        <label
-          >ต้องการความยากในการเลี้ยงระดับไหน?<select id="difficulty">
-            <option value="">ไม่จำกัด</option>
-            <option>ง่าย</option>
-            <option>ปานกลาง</option>
-            <option>ยาก</option>
-          </select></label
-        >
-        <label
-          >ขนาดสัตว์ที่ต้องการ?<select id="size">
-            <option value="">ไม่จำกัด</option>
-            <option>เล็ก</option>
-            <option>กลาง</option>
-            <option>ใหญ่</option>
-          </select></label
-        >
-        <label
-          >พลังงานที่เหมาะกับคุณ?<select id="energy">
-            <option value="">ไม่จำกัด</option>
-            <option>ต่ำ</option>
-            <option>ปานกลาง</option>
-            <option>สูง</option>
-          </select></label
-        >
-        <label
-          >ประเภทสัตว์ที่สนใจ?<select id="category">
-            <option value="">ไม่จำกัด</option>
-          </select></label
-        >
-        <button class="btn btn-primary" onclick="findPets()">
-          ค้นหาสัตว์ที่เหมาะกับฉัน
+    </nav>
+  </header>
+  <main class="container">
+    <div class="page-title">
+      <p class="eyebrow">PET FINDER</p>
+      <h1>สุนัขที่เหมาะกับฉัน</h1>
+      <p>ตอบคำถามสั้น ๆ แล้วระบบจะกรองสัตว์เลี้ยงตามความต้องการของคุณ</p>
+    </div>
+
+    <div class="pet-type-selector">
+      <h2>คุณกำลังมองหาสัตว์เลี้ยงชนิดไหน?</h2>
+      <div class="pet-type-options">
+        <a href="recommend.html" class="pet-type-btn active" aria-current="page">
+          🐶 สุนัข
+        </a>
+        <a href="recommend-cat.html" class="pet-type-btn">
+          🐱 แมว
+        </a>
+      </div>
+    </div>
+
+    <div class="finder-quiz">
+      <div class="quiz-progress">
+        <div class="quiz-progress-top">
+          <span id="step-label">คำถามข้อ 1 จาก 10</span>
+          <span id="progress-percent">10%</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div id="question-area"></div>
+
+      <div class="quiz-actions">
+        <button id="prev-btn" class="btn btn-secondary" type="button">
+          ย้อนกลับ
+        </button>
+        <button id="next-btn" class="btn btn-primary" type="button">
+          ถัดไป
         </button>
       </div>
+    </div>
+
+    <section id="result-section" hidden>
+      <div class="page-title">
+        <p class="eyebrow">YOUR BEST MATCH</p>
+        <h2>3 สายพันธุ์ที่เหมาะกับคุณ</h2>
+        <p>ผลลัพธ์จากไลฟ์สไตล์และข้อจำกัดในการเลี้ยงของคุณ</p>
+      </div>
+
       <div id="result" class="pet-grid"></div>
-    </main>
-    <footer>© 2026 PetGuide</footer>
-    <script src="/js/app.js"></script>
-    <script>
-      (async () => {
+
+      <button id="retry-btn" class="btn btn-secondary" type="button">
+        ทำแบบทดสอบอีกครั้ง
+      </button>
+    </section>
+
+    <div id="result" class="pet-grid"></div>
+  </main>
+  <footer>© 2026 PetGuide</footer>
+  <script src="/js/app.js"></script>
+  <script>
+    (async () => {
+      try {
         await loadAuthNav();
-        const c = await fetchJSON("/api/categories");
-        category.innerHTML += c
-          .map((x) => `<option>${escapeHtml(x.name)}</option>`)
-          .join("");
-      })();
-      async function findPets() {
-        const p = new URLSearchParams();
-        ["difficulty", "size", "energy", "category"].forEach((x) => {
-          if (document.getElementById(x).value)
-            p.set(x, document.getElementById(x).value);
-        });
-        const pets = await fetchJSON("/api/pets?" + p);
-        result.innerHTML = pets.length
-          ? pets.map(petCard).join("")
-          : "<div class='empty'>ยังไม่พบสัตว์ที่ตรงกับเงื่อนไข</div>";
+      } catch (error) {
+        console.error("โหลดเมนูสมาชิกไม่สำเร็จ:", error);
       }
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const c = location.pathname.split("/").pop() || "index.html";
-        document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
-          if (a.getAttribute("href") === c) a.classList.add("active");
-        });
+    })();
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const c = location.pathname.split("/").pop() || "index.html";
+      document.querySelectorAll(".site-navbar .nav-main a").forEach((a) => {
+        if (a.getAttribute("href") === c) a.classList.add("active");
       });
-    </script>
-  </body>
+    });
+
+
+    const questions = [
+      {
+        title: "ในแต่ละวัน คุณมีเวลาให้สุนัขมากแค่ไหน?",
+        description: "นับรวมการให้อาหาร พาเดินเล่น ฝึก และเล่นด้วยกัน",
+        key: "time",
+        options: [
+          { label: "น้อยกว่า 1 ชั่วโมง", value: "low" },
+          { label: "ประมาณ 1–2 ชั่วโมง", value: "medium" },
+          { label: "มากกว่า 2 ชั่วโมง", value: "high" },
+        ],
+      },
+      {
+        title: "วันว่างของคุณมักเป็นแบบไหน?",
+        description: "เลือกตามชีวิตจริง ไม่ใช่ชีวิตในอุดมคติ",
+        key: "activity",
+        options: [
+          { label: "ชอบอยู่บ้าน พักผ่อนเป็นหลัก", value: "low" },
+          { label: "ออกไปข้างนอกบ้าง เดินเล่นบ้าง", value: "medium" },
+          { label: "ชอบออกกำลังกาย เดินทาง หรือทำกิจกรรมกลางแจ้ง", value: "high" },
+        ],
+      },
+      {
+        title: "คุณอาศัยอยู่ในพื้นที่แบบไหน?",
+        description: "พื้นที่และข้อจำกัดของที่พักมีผลต่อการเลี้ยงสุนัข",
+        key: "space",
+        options: [
+          { label: "ห้องพักหรือหอพัก พื้นที่ค่อนข้างจำกัด", value: "small" },
+          { label: "บ้านหรือห้องที่มีพื้นที่พอสมควร", value: "medium" },
+          { label: "บ้านที่มีพื้นที่กว้างหรือสนาม", value: "large" },
+        ],
+      },
+      {
+        title: "คุณรับมือกับขนร่วงและการดูแลขนได้แค่ไหน?",
+        description: "รวมการแปรงขน อาบน้ำ และพาไปดูแลขน",
+        key: "grooming",
+        options: [
+          { label: "อยากดูแลง่าย ขนร่วงน้อย", value: "low" },
+          { label: "ดูแลเป็นประจำได้", value: "medium" },
+          { label: "ยอมดูแลขนเยอะได้ ถ้าชอบสายพันธุ์นั้น", value: "high" },
+        ],
+      },
+      {
+        title: "คุณตั้งงบดูแลสุนัขต่อเดือนไว้เท่าไร?",
+        description: "รวมอาหารและค่าใช้จ่ายประจำ ไม่รวมเหตุฉุกเฉิน",
+        key: "budget",
+        options: [
+          { label: "ไม่เกิน 1,500 บาท", value: "low" },
+          { label: "1,501–3,000 บาท", value: "medium" },
+          { label: "มากกว่า 3,000 บาท", value: "high" },
+        ],
+      },
+      {
+        title: "คุณมีประสบการณ์เลี้ยงสุนัขแค่ไหน?",
+        description: "สุนัขบางสายพันธุ์ต้องใช้ประสบการณ์ในการฝึกมากกว่า",
+        key: "experience",
+        options: [
+          { label: "ยังไม่เคยเลี้ยงจริงจัง", value: "beginner" },
+          { label: "เคยเลี้ยงหรือช่วยดูแลมาบ้าง", value: "some" },
+          { label: "มีประสบการณ์เลี้ยงและฝึกสุนัข", value: "experienced" },
+        ],
+      },
+      {
+        title: "คุณอยากได้สุนัขที่มีพลังงานระดับไหน?",
+        description: "คิดถึงระดับกิจกรรมที่คุณสามารถดูแลได้ทุกวัน",
+        key: "energy",
+        options: [
+          { label: "สงบ ไม่ต้องทำกิจกรรมหนัก", value: "low" },
+          { label: "เล่นและเดินเล่นได้ทุกวัน", value: "medium" },
+          { label: "กระฉับกระเฉง พร้อมทำกิจกรรมเยอะ", value: "high" },
+        ],
+      },
+      {
+        title: "คุณมีเด็กเล็กหรือสัตว์เลี้ยงตัวอื่นอยู่ที่บ้านไหม?",
+        description: "เลือกสิ่งที่มีอยู่หรือคาดว่าจะมีในบ้าน",
+        key: "household",
+        options: [
+          { label: "มีเด็กเล็ก", value: "children" },
+          { label: "มีสุนัขหรือสัตว์เลี้ยงตัวอื่น", value: "pets" },
+          { label: "ไม่มี อยู่กันเฉพาะผู้ใหญ่", value: "adults" },
+        ],
+      },
+      {
+        title: "คุณอยากได้สุนัขที่มีนิสัยแบบไหนเมื่ออยู่กับคน?",
+        description: "แต่ละสายพันธุ์มีระดับความเป็นมิตรและความเป็นอิสระต่างกัน",
+        key: "social",
+        options: [
+          { label: "เป็นมิตร เข้ากับคนง่าย", value: "friendly" },
+          { label: "สมดุล ทั้งเล่นด้วยและอยู่ลำพังได้", value: "balanced" },
+          { label: "รักอิสระ ไม่ต้องติดคนตลอดเวลา", value: "independent" },
+        ],
+      },
+      {
+        title: "คุณอยากได้สุนัขที่เห่าเฝ้าบ้านหรือค่อนข้างเงียบ?",
+        description: "พิจารณาเพื่อนบ้านและสภาพแวดล้อมที่อยู่อาศัยด้วย",
+        key: "noise",
+        options: [
+          { label: "ค่อนข้างเงียบ", value: "quiet" },
+          { label: "เห่าบ้างเมื่อมีเหตุ", value: "some" },
+          { label: "แจ้งเตือนหรือเฝ้าบ้านได้", value: "alert" },
+        ],
+      },
+    ];
+
+    const answers = {};
+    let currentStep = 0;
+    let allPets = [];
+
+    const questionArea = document.getElementById("question-area");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+
+    function renderQuestion() {
+      const q = questions[currentStep];
+      const selected = answers[q.key] || "";
+
+      document.getElementById("step-label").textContent = `คำถามข้อ ${currentStep + 1} จาก ${questions.length}`;
+
+      const percent = Math.round(
+        ((currentStep + 1) / questions.length) * 100
+      );
+
+      document.getElementById("progress-percent").textContent = `${percent}%`;
+      document.getElementById("progress-fill").style.width = `${percent}%`;
+
+      questionArea.innerHTML = `
+    <h2 class="question-title">${escapeHtml(q.title)}</h2>
+    <p class="question-description">${escapeHtml(q.description)}</p>
+    <div class="answer-list">
+      ${q.options.map((option) => `
+        <label class="answer-option">
+          <input
+            type="radio"
+            name="${q.key}"
+            value="${option.value}"
+            ${selected === option.value ? "checked" : ""}
+          />
+          <span>${escapeHtml(option.label)}</span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+
+      prevBtn.hidden = currentStep === 0;
+      nextBtn.textContent =
+        currentStep === questions.length - 1
+          ? "ดูผลลัพธ์"
+          : "ถัดไป";
+    }
+
+    function getSelectedAnswer() {
+      return questionArea.querySelector('input[type="radio"]:checked')?.value;
+    }
+
+    prevBtn.addEventListener("click", () => {
+      if (currentStep > 0) {
+        currentStep--;
+        renderQuestion();
+      }
+    });
+
+    nextBtn.addEventListener("click", async () => {
+      const q = questions[currentStep];
+      const selected = getSelectedAnswer();
+
+      if (!selected && !answers[q.key]) {
+        alert("กรุณาเลือกคำตอบก่อนดำเนินการต่อ");
+        return;
+      }
+
+      if (selected) answers[q.key] = selected;
+
+      if (currentStep < questions.length - 1) {
+        currentStep++;
+        renderQuestion();
+        return;
+      }
+
+      await showRecommendations();
+    });
+
+    // แปลงค่าจากฐานข้อมูลให้เทียบกันได้
+    function normalize(value) {
+      return String(value ?? "").trim().toLowerCase();
+    }
+
+    function getField(pet, fields) {
+      for (const field of fields) {
+        if (pet[field] !== undefined && pet[field] !== null) {
+          return pet[field];
+        }
+      }
+      return undefined;
+    }
+
+    function classifyLevel(value) {
+      const v = normalize(value);
+
+      if (
+        ["ง่าย", "ต่ำ", "เล็ก", "low", "easy", "small", "1"].includes(v)
+      ) return "low";
+
+      if (
+        ["ปานกลาง", "กลาง", "medium", "moderate", "2"].includes(v)
+      ) return "medium";
+
+      if (
+        ["ยาก", "สูง", "ใหญ่", "high", "hard", "large", "3"].includes(v)
+      ) return "high";
+
+      return null;
+    }
+
+    function scoreMatch(pet) {
+      let score = 0;
+      let maxScore = 0;
+      const reasons = [];
+
+      function compare(fields, desired, weight, reason) {
+        const raw = getField(pet, fields);
+        const actual = classifyLevel(raw);
+
+        if (!actual) return;
+
+        maxScore += weight;
+
+        // ค่าที่ตรงกันได้คะแนนเต็ม ค่าที่ใกล้เคียงได้บางส่วน
+        const levels = ["low", "medium", "high"];
+        const distance = Math.abs(
+          levels.indexOf(actual) - levels.indexOf(desired)
+        );
+
+        const points = distance === 0 ? weight : distance === 1
+          ? weight * 0.5
+          : 0;
+
+        score += points;
+
+        if (distance === 0) reasons.push(reason);
+      }
+
+      compare(
+        ["energy", "energyLevel", "activityLevel", "พลังงาน"],
+        answers.energy,
+        3,
+        "ระดับพลังงานตรงกับไลฟ์สไตล์"
+      );
+
+      compare(
+        ["energy", "energyLevel", "activityLevel", "พลังงาน"],
+        answers.activity,
+        2,
+        "ระดับกิจกรรมเข้ากับวันว่างของคุณ"
+      );
+
+      const profileText = normalize([
+        pet.personality, pet.temperament, pet.characteristics, pet.description, pet.care, pet.specialFeatures,
+      ].filter(Boolean).join(" "));
+      const textPreferences = {
+        household: {
+          children: ["เด็ก", "ครอบครัว", "เป็นมิตร", "อ่อนโยน"],
+          pets: ["สัตว์เลี้ยง", "เข้ากับสัตว์", "เข้ากับสุนัข", "เป็นมิตร"],
+          adults: ["รักอิสระ", "เฝ้าบ้าน", "ระวัง", "สงบ"],
+        },
+        social: {
+          friendly: ["เป็นมิตร", "ขี้อ้อน", "รักเจ้าของ", "เข้ากับคน"],
+          balanced: ["สมดุล", "ขี้เล่น", "สงบ", "ปรับตัว"],
+          independent: ["รักอิสระ", "เป็นตัวของตัวเอง", "อยู่ลำพัง", "ไม่ติดคน"],
+        },
+        noise: {
+          quiet: ["เงียบ", "ไม่ค่อยเห่า", "สงบ"],
+          some: ["เห่าบ้าง", "ช่างสังเกต", "ตื่นตัว"],
+          alert: ["เฝ้าบ้าน", "เฝ้าระวัง", "แจ้งเตือน", "เห่าเก่ง"],
+        },
+      };
+      for (const [key, preferences] of Object.entries(textPreferences)) {
+        const keywords = preferences[answers[key]] || [];
+        if (!profileText || !keywords.length) continue;
+        maxScore += 2;
+        if (keywords.some((keyword) => profileText.includes(normalize(keyword)))) {
+          score += 2;
+          reasons.push(key === "household" ? "ลักษณะนิสัยเหมาะกับสมาชิกในบ้าน" : key === "social" ? "บุคลิกตรงกับที่คุณมองหา" : "ลักษณะการส่งเสียงตรงกับความต้องการ");
+        }
+      }
+
+      // พื้นที่เล็กควรให้ความสำคัญกับขนาดสุนัข
+      const sizePreference = {
+        small: "low",
+        medium: "medium",
+        large: "high",
+      }[answers.space];
+
+      compare(
+        ["size", "sizeLevel", "ขนาด"],
+        sizePreference,
+        3,
+        "ขนาดเหมาะกับพื้นที่อยู่อาศัย"
+      );
+
+      compare(
+        ["difficulty", "difficultyLevel", "careDifficulty", "ความยากในการเลี้ยง"],
+        answers.experience === "beginner"
+          ? "low"
+          : answers.experience === "some"
+            ? "medium"
+            : "high",
+        2,
+        "ระดับการดูแลสอดคล้องกับประสบการณ์"
+      );
+
+      // ความเป็นมิตรกับผู้เริ่มต้น
+      const beginner = getField(pet, ["beginnerSuitable", "beginnerFriendly"]);
+
+      if (typeof beginner === "boolean" && answers.experience === "beginner") {
+        maxScore += 3;
+        if (beginner) {
+          score += 3;
+          reasons.push("เหมาะกับผู้เริ่มต้นเลี้ยง");
+        }
+      }
+
+      // งบประมาณ: ประเมินได้เมื่อฐานข้อมูลมี monthlyCost เป็นตัวเลข
+      const monthlyCost = Number(
+        getField(pet, ["monthlyCost", "estimatedMonthlyCost"])
+      );
+
+      if (Number.isFinite(monthlyCost) && monthlyCost > 0) {
+        maxScore += 3;
+
+        const budgetLimit = {
+          low: 1500,
+          medium: 3000,
+          high: Infinity,
+        }[answers.budget];
+
+        if (monthlyCost <= budgetLimit) {
+          score += 3;
+          reasons.push("ค่าใช้จ่ายโดยประมาณอยู่ในงบ");
+        } else if (monthlyCost <= budgetLimit * 1.25) {
+          score += 1;
+        }
+      }
+
+      // เวลา: สุนัขที่ต้องการการดูแลสูงอาจไม่เหมาะกับเวลาจำกัด
+      const difficulty = classifyLevel(
+        getField(pet, ["difficulty", "difficultyLevel", "careDifficulty"])
+      );
+
+      if (difficulty) {
+        maxScore += 2;
+
+        const availableTime = {
+          low: "low",
+          medium: "medium",
+          high: "high",
+        }[answers.time];
+
+        const levels = ["low", "medium", "high"];
+        const distance = Math.abs(
+          levels.indexOf(difficulty) - levels.indexOf(availableTime)
+        );
+
+        score += distance === 0 ? 2 : distance === 1 ? 1 : 0;
+
+        if (distance === 0) reasons.push("ระดับการดูแลสอดคล้องกับเวลาที่มี");
+      }
+
+      // หากยังไม่มีข้อมูลบางฟิลด์ คะแนนจะคิดจากฟิลด์ที่มีเท่านั้น
+      return {
+        percent: maxScore ? Math.round((score / maxScore) * 100) : 0,
+        reasons,
+        hasData: maxScore > 0,
+      };
+    }
+
+    function isDog(pet) {
+      const category = normalize(
+        getField(pet, ["category", "animalType", "type"])
+      );
+
+      return ["สุนัข", "หมา", "dog", "dogs"].includes(category);
+    }
+
+    async function showRecommendations() {
+      nextBtn.disabled = true;
+      nextBtn.textContent = "กำลังคำนวณ...";
+
+      try {
+        // ใช้ข้อมูลสุนัขจากฐานข้อมูลที่มีอยู่
+        if (!allPets.length) {
+          allPets = await fetchJSON("/api/pets");
+        }
+
+        const ranked = allPets
+          .filter(isDog)
+          .map((pet) => ({
+            pet,
+            ...scoreMatch(pet),
+          }))
+          .filter((item) => item.hasData)
+          .sort((a, b) => b.percent - a.percent)
+          .slice(0, 3);
+
+        document.querySelector(".finder-quiz").hidden = true;
+        document.getElementById("result-section").hidden = false;
+
+        const result = document.getElementById("result");
+
+        if (!ranked.length) {
+          result.innerHTML = `
+        <div class="empty">
+          ยังไม่สามารถคำนวณคะแนนได้
+          กรุณาตรวจสอบข้อมูลสายพันธุ์ในฐานข้อมูล
+          โดยเฉพาะ category, size, energy และ difficulty
+        </div>
+      `;
+          return;
+        }
+
+        result.innerHTML = ranked.map((item, index) => {
+          const pet = item.pet;
+          const reasons = item.reasons.length
+            ? item.reasons.slice(0, 3).join(" • ")
+            : "มีข้อมูลคุณลักษณะสำหรับใช้เปรียบเทียบกับไลฟ์สไตล์ของคุณ";
+
+          return `
+        <article class="match-card">
+          <div class="match-summary">
+            <strong>อันดับ ${index + 1}</strong>
+            <span class="match-percent">
+              ความเข้ากัน ${item.percent}%
+            </span>
+          </div>
+          ${petCard(pet)}
+          <p class="match-reason">
+            <strong>เหตุผลที่แนะนำ:</strong>
+            ${escapeHtml(reasons)}
+          </p>
+        </article>
+      `;
+        }).join("");
+      } catch (error) {
+        console.error(error);
+        alert("ไม่สามารถโหลดข้อมูลสุนัขได้ กรุณาลองใหม่อีกครั้ง");
+      } finally {
+        nextBtn.disabled = false;
+        nextBtn.textContent = "ดูผลลัพธ์";
+      }
+    }
+
+    document.getElementById("retry-btn").addEventListener("click", () => {
+      Object.keys(answers).forEach((key) => delete answers[key]);
+      currentStep = 0;
+
+      document.getElementById("result-section").hidden = true;
+      document.querySelector(".finder-quiz").hidden = false;
+
+      renderQuestion();
+    });
+
+    renderQuestion();
+
+  </script>
+</body>
+
 </html>

@@ -7,7 +7,6 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ObjectId } = require("mongodb");
-const catBreeds = require("./data/cats.json");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1120,63 +1119,15 @@ async function seed() {
       createdAt: new Date()
     });
   }
+  const now = new Date();
 
   const pets = db.collection("pets");
+
   if (await pets.countDocuments() === 0) {
     await pets.insertMany([
-      {
-        name: "Golden Retriever",
-        scientificName: "Canis lupus familiaris",
-        category: "สุนัข",
-        description: "สุนัขที่เป็นมิตร ฉลาด และชอบทำกิจกรรมร่วมกับคน",
-        characteristics: "ขนาดกลางถึงใหญ่ ขนสองชั้น สีทอง",
-        personality: "เป็นมิตร ร่าเริง เรียนรู้ได้ดี",
-        difficulty: "ปานกลาง", energy: "สูง", size: "ใหญ่", grooming: "ปานกลาง",
-        lifespan: "10–12 ปี", food: "อาหารสุนัขที่เหมาะสมกับวัยและกิจกรรม",
-        care: "ต้องการการออกกำลังกายและการฝึกอย่างสม่ำเสมอ",
-        specialFeatures: "เหมาะกับกิจกรรมและการฝึกหลายรูปแบบ",
-        image: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=80",
-        recommended: true, createdAt: new Date(), updatedAt: new Date()
-      },
-      {
-        name: "Leopard Gecko",
-        scientificName: "Eublepharis macularius",
-        category: "สัตว์เลื้อยคลาน",
-        description: "ตุ๊กแกขนาดเล็กที่มีลวดลายบนลำตัวและเหมาะกับการเลี้ยงในพื้นที่ควบคุม",
-        characteristics: "ตัวเล็ก มีลวดลาย หางอวบ",
-        personality: "ค่อนข้างสงบ",
-        difficulty: "ปานกลาง", energy: "ต่ำ", size: "เล็ก", grooming: "ต่ำ",
-        lifespan: "10–20 ปี", food: "แมลงที่เหมาะสม",
-        care: "จัดสภาพแวดล้อม อุณหภูมิ และที่หลบซ่อนให้เหมาะสม",
-        specialFeatures: "ลวดลายหลากหลายและดูแลขนไม่ต้องใช้",
-        image: "https://images.unsplash.com/photo-1520637836862-4d197d17c35a?auto=format&fit=crop&w=900&q=80",
-        recommended: true, createdAt: new Date(), updatedAt: new Date()
-      },
-      {
-        name: "Betta Fish",
-        scientificName: "Betta splendens",
-        category: "ปลา",
-        description: "ปลาสวยงามที่มีครีบและสีสันหลากหลาย",
-        characteristics: "ขนาดเล็ก สีสันหลากหลาย ครีบโดดเด่น",
-        personality: "มีพฤติกรรมเฉพาะตัวและอาจหวงพื้นที่",
-        difficulty: "ง่าย", energy: "ต่ำ", size: "เล็ก", grooming: "ต่ำ",
-        lifespan: "2–4 ปี", food: "อาหารปลากัดที่เหมาะสม",
-        care: "รักษาคุณภาพน้ำและจัดภาชนะให้เหมาะสม",
-        specialFeatures: "มีสีและรูปทรงครีบหลากหลาย",
-        image: "https://images.unsplash.com/photo-1520990265275-0d9c9d9b9c6c?auto=format&fit=crop&w=900&q=80",
-        recommended: false, createdAt: new Date(), updatedAt: new Date()
-      }
+      // ข้อมูลตัวอย่างเดิมทั้ง 3 รายการ
     ]);
   }
-
-  const now = new Date();
-  await pets.bulkWrite(catBreeds.map((cat) => ({
-    updateOne: {
-      filter: { name: cat.name, category: cat.category },
-      update: { $set: { ...cat, updatedAt: now }, $setOnInsert: { createdAt: now } },
-      upsert: true
-    }
-  })));
 }
 
 async function start() {
