@@ -70,6 +70,9 @@
     <script>
       // ฟังก์ชัน Render การ์ดคู่กับปุ่มกากบาท
       function renderFavoriteCard(pet) {
+        // ดึงค่า id ให้ชัวร์ว่าไม่เป็น undefined
+        const petId = pet.id || pet._id;
+
         const cardContent = typeof petCard === 'function' ? petCard(pet) : `
           <img src="${pet.image || ''}" alt="${pet.name}">
           <div class="pet-card-body">
@@ -78,9 +81,10 @@
           </div>
         `;
 
+        // ส่ง `this` เข้าไปใน removeFavorite เพื่อใช้อ้างอิงปุ่มที่ถูกกดโดยตรง
         return `
-          <div class="pet-card" id="fav-card-${pet.id}">
-            <button class="btn-remove-fav" onclick="removeFavorite('${pet.id}')" title="ยกเลิกรายการโปรด">✕</button>
+          <div class="pet-card">
+            <button class="btn-remove-fav" onclick="removeFavorite(event, '${petId}', this)" title="ยกเลิกรายการโปรด">✕</button>
             ${cardContent}
           </div>
         `;
@@ -102,15 +106,17 @@
         }
       }
 
-      // ฟังก์ชันกดยกเลิกชอบ (กากบาทออก)
-      async function removeFavorite(petId) {
+      // ฟังก์ชันกดยกเลิกชอบ (ใช้ btnTarget ลบการ์ดใบที่กดโดยตรง)
+      async function removeFavorite(event, petId, btnTarget) {
+        event.stopPropagation(); // ป้องกันการคลิกซ้อนทับ
+        
         if (!confirm("ต้องการลบออกจากรายการโปรดหรือไม่?")) return;
 
         try {
           await api(`/api/favorites/${petId}`, { method: "DELETE" });
 
-          // ลบการ์ดออกจากหน้าจอทันที
-          const cardEl = document.getElementById(`fav-card-${petId}`);
+          // ลบ Element ของการ์ดใบนั้นๆ โดยใช้อ้างอิงจากปุ่มที่กดตรงๆ
+          const cardEl = btnTarget.closest('.pet-card');
           if (cardEl) {
             cardEl.remove();
           }
