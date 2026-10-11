@@ -7,6 +7,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ObjectId } = require("mongodb");
+const rejectionOptions = require("./public/data/community-rejection-reasons.json");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 
 let db;
 
+// Four 5 MB images need about 27 MB after Base64 encoding.
+app.use("/api/community", express.json({ limit: "30mb" }));
 app.use(express.json({ limit: "7mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -60,6 +63,177 @@ function adminOnly(req, res, next) {
   }
   next();
 }
+
+// ---------- Community API ----------
+// Comments are stored inside each post for atomic parent validation and insertion.
+function communityRoutes(getDb, auth) {
+  const router = express.Router();
+  const posts = () => getDb().collection("communityPosts");
+  const imageDirectory = path.join(__dirname, "public", "images", "community");
+  const validId = value => typeof value === "string" && /^[a-f0-9]{24}$/i.test(value);
+  const text = value => typeof value === "string" ? value.trim() : "";
+  const fail = (message, status = 400) => Object.assign(new Error(message), { status });
+  // Existing posts without a status were published before moderation was added.
+  const publicFilter = () => ({ $or: [{ status: "approved" }, { status: { $exists: false } }] });
+  const isPublic = post => post.status === "approved" || post.status === undefined;
+  const mineOnly = (req, res, next) => req.query.mine === "true" ? auth(req, res, next) : next();
+  async function adminOnly(req, res, next) {
+    const user = await getDb().collection("users").findOne({ _id: new ObjectId(req.user.id) });
+    if (user?.role !== "admin") throw fail("เฉพาะผู้ดูแลระบบเท่านั้น", 403);
+    next();
+  }
+  async function listPosts(req, res, filter) {
+    if (text(req.query.category)) filter.category = text(req.query.category);
+    if (text(req.query.type)) filter.type = text(req.query.type);
+    if (req.query.before) {
+      if (!validId(req.query.before)) throw fail("ตำแหน่งโพสต์ไม่ถูกต้อง");
+      filter._id = { $lt: new ObjectId(req.query.before) };
+    }
+    const rows = await posts().find(filter, { projection: { comments: 0 } }).sort({ _id: -1 }).limit(21).toArray();
+    const items = rows.slice(0, 20);
+    res.json({ posts: items, nextCursor: rows.length > 20 ? items.at(-1)._id.toString() : null });
+  }
+
+  function decodeImage(data) {
+    const match = typeof data === "string" && /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(data);
+    if (!match) throw fail("รองรับรูป JPG, PNG และ WebP เท่านั้น");
+    const buffer = Buffer.from(match[2], "base64");
+    if (!buffer.length || buffer.length > 5 * 1024 * 1024) throw fail("รูปแต่ละรูปต้องมีขนาดไม่เกิน 5 MB");
+    const valid = match[1] === "jpeg" ? buffer[0] === 255 && buffer[1] === 216 && buffer[2] === 255
+      : match[1] === "png" ? buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+        : buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP";
+    if (!valid) throw fail("ข้อมูลไฟล์ไม่ตรงกับชนิดรูปภาพ");
+    return { buffer, filename: `${crypto.randomBytes(16).toString("hex")}.${match[1] === "jpeg" ? "jpg" : match[1]}` };
+  }
+
+  router.get("/posts", mineOnly, async (req, res) => {
+    await listPosts(req, res, req.query.mine === "true" ? { userId: req.user.id } : publicFilter());
+  });
+
+  router.get("/admin/posts", auth, adminOnly, async (req, res) => {
+    const status = text(req.query.status) || "pending";
+    if (!["pending", "approved", "rejected", "all"].includes(status)) throw fail("สถานะไม่ถูกต้อง");
+    await listPosts(req, res, status === "all" ? {} : status === "approved" ? publicFilter() : { status });
+  });
+
+  router.put("/admin/posts/:id/review", auth, adminOnly, async (req, res) => {
+    if (!validId(req.params.id)) throw fail("รหัสโพสต์ไม่ถูกต้อง");
+    const status = req.body.status;
+    if (!["approved", "rejected"].includes(status)) throw fail("เลือกอนุมัติหรือไม่อนุมัติ");
+    let selected = [];
+    if (status === "rejected") {
+      const codes = req.body.reasons;
+      if (!Array.isArray(codes) || !codes.length || codes.length > rejectionOptions.length || codes.some(code => !rejectionOptions.some(option => option.code === code))) {
+        throw fail("เลือกเหตุผลที่ไม่อนุมัติจากรายการอย่างน้อย 1 ข้อ");
+      }
+      selected = rejectionOptions.filter(option => codes.includes(option.code));
+    }
+    const result = await posts().updateOne({ _id: new ObjectId(req.params.id), status: "pending" }, { $set: {
+      status, rejectionReason: selected.map(option => option.label).join(" • "), rejectionReasonCodes: selected.map(option => option.code),
+      reviewedAt: new Date(), reviewedBy: req.user.id, notificationReadAt: null
+    } });
+    if (!result.matchedCount) throw fail("โพสต์ถูกลบหรือได้รับการตรวจสอบแล้ว กรุณาโหลดรายการใหม่", 409);
+    res.json({ message: status === "approved" ? "อนุมัติโพสต์แล้ว" : "ไม่อนุมัติโพสต์และแจ้งผู้ใช้แล้ว" });
+  });
+
+  router.get("/notifications", auth, async (req, res) => {
+    const filter = { userId: req.user.id, status: "rejected", notificationReadAt: null };
+    const [items, total] = await Promise.all([
+      posts().find(filter, { projection: { title: 1, rejectionReason: 1, reviewedAt: 1 } }).sort({ reviewedAt: -1 }).limit(20).toArray(),
+      posts().countDocuments(filter)
+    ]);
+    res.json({ items, total });
+  });
+
+  router.put("/posts/:id/notification", auth, async (req, res) => {
+    if (!validId(req.params.id)) throw fail("รหัสโพสต์ไม่ถูกต้อง");
+    const result = await posts().updateOne({ _id: new ObjectId(req.params.id), userId: req.user.id, status: "rejected" }, { $set: { notificationReadAt: new Date() } });
+    if (!result.matchedCount) throw fail("ไม่พบการแจ้งเตือน", 404);
+    res.json({ message: "รับทราบแล้ว" });
+  });
+
+  router.delete("/posts/:id", auth, async (req, res) => {
+    if (!validId(req.params.id)) throw fail("รหัสโพสต์ไม่ถูกต้อง");
+    const post = await posts().findOneAndDelete({ _id: new ObjectId(req.params.id), userId: req.user.id });
+    if (!post) {
+      if (await posts().findOne({ _id: new ObjectId(req.params.id) })) throw fail("ลบได้เฉพาะโพสต์ของตัวเอง", 403);
+      throw fail("ไม่พบโพสต์", 404);
+    }
+    for (const image of post.images || []) {
+      const match = /^\/images\/community\/([a-f0-9]{32}\.(?:jpg|png|webp))$/.exec(image);
+      if (!match || await posts().countDocuments({ images: image })) continue;
+      try { await fs.unlink(path.join(imageDirectory, match[1])); }
+      catch (error) { if (error.code !== "ENOENT") console.error("Community image cleanup:", error); }
+    }
+    res.json({ message: "ลบโพสต์แล้ว" });
+  });
+
+  router.post("/posts", auth, async (req, res) => {
+    const title = text(req.body.title), content = text(req.body.content), category = text(req.body.category);
+    const type = req.body.type;
+    if (!title || title.length > 160 || !content || content.length > 10000) throw fail("ระบุหัวข้อไม่เกิน 160 ตัวอักษร และเนื้อหาไม่เกิน 10,000 ตัวอักษร");
+    if (!["article", "question"].includes(type)) throw fail("เลือกประเภทบทความหรือคำถาม");
+    if (!category || !(await getDb().collection("categories").findOne({ name: category }))) throw fail("กรุณาเลือกหมวดสัตว์เลี้ยงที่มีในระบบ");
+    const images = req.body.images ?? [];
+    if (!Array.isArray(images) || images.length > 4) throw fail("แนบรูปได้ไม่เกิน 4 รูป");
+    const decoded = images.map(decodeImage);
+    const written = [];
+    try {
+      if (decoded.length) await fs.mkdir(imageDirectory, { recursive: true });
+      for (const image of decoded) {
+        const file = path.join(imageDirectory, image.filename);
+        await fs.writeFile(file, image.buffer, { flag: "wx" });
+        written.push(file);
+      }
+      const user = await getDb().collection("users").findOne({ _id: new ObjectId(req.user.id) });
+      if (!user) throw fail("ไม่พบบัญชีผู้ใช้ กรุณาเข้าสู่ระบบใหม่", 401);
+      const post = { title, content, category, type, images: decoded.map(i => `/images/community/${i.filename}`),
+        userId: req.user.id, username: user.username, createdAt: new Date(), comments: [], commentCount: 0,
+        status: user.role === "admin" ? "approved" : "pending", rejectionReason: "" };
+      const result = await posts().insertOne(post);
+      res.status(201).json({ ...post, _id: result.insertedId });
+    } catch (error) {
+      await Promise.allSettled(written.map(file => fs.unlink(file)));
+      throw error;
+    }
+  });
+
+  router.get("/posts/:id/comments", async (req, res) => {
+    if (!validId(req.params.id)) throw fail("รหัสโพสต์ไม่ถูกต้อง");
+    const post = await posts().findOne({ _id: new ObjectId(req.params.id), ...publicFilter() }, { projection: { comments: 1 } });
+    if (!post) throw fail("ไม่พบโพสต์", 404);
+    res.json(post.comments || []);
+  });
+
+  router.post("/posts/:id/comments", auth, async (req, res) => {
+    if (!validId(req.params.id)) throw fail("รหัสโพสต์ไม่ถูกต้อง");
+    const content = text(req.body.content), parentId = req.body.parentId || null;
+    if (!content || content.length > 2000) throw fail("เขียนความคิดเห็นไม่เกิน 2,000 ตัวอักษร");
+    if (parentId && !validId(parentId)) throw fail("รหัสความคิดเห็นไม่ถูกต้อง");
+    const user = await getDb().collection("users").findOne({ _id: new ObjectId(req.user.id) });
+    if (!user) throw fail("ไม่พบบัญชีผู้ใช้ กรุณาเข้าสู่ระบบใหม่", 401);
+    const comment = { _id: new ObjectId().toString(), parentId, content, userId: req.user.id, username: user.username, createdAt: new Date() };
+    const filter = { _id: new ObjectId(req.params.id), ...publicFilter(), commentCount: { $lt: 500 } };
+    if (parentId) filter["comments._id"] = parentId;
+    const result = await posts().updateOne(filter, { $push: { comments: comment }, $inc: { commentCount: 1 } });
+    if (!result.matchedCount) {
+      const post = await posts().findOne({ _id: filter._id });
+      if (!post) throw fail("ไม่พบโพสต์", 404);
+      if (!isPublic(post)) throw fail("แสดงความคิดเห็นได้เมื่อโพสต์ได้รับอนุมัติแล้วเท่านั้น", 403);
+      if (post.commentCount >= 500) throw fail("โพสต์นี้มีความคิดเห็นครบ 500 รายการแล้ว", 409);
+      throw fail("ไม่พบความคิดเห็นที่ต้องการตอบกลับในโพสต์นี้", 404);
+    }
+    res.status(201).json(comment);
+  });
+
+  router.use((error, req, res, next) => {
+    if (!error.status) console.error("Community error:", error);
+    res.status(error.status || 500).json({ message: error.status ? error.message : "ไม่สามารถบันทึกหรือโหลดข้อมูลชุมชนได้ กรุณาลองใหม่" });
+  });
+  return router;
+}
+
+app.use("/api/community", communityRoutes(() => db, auth));
 
 app.post("/api/admin/upload-image", auth, adminOnly, async (req, res) => {
   const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(req.body.imageData || "");
@@ -1092,21 +1266,22 @@ app.delete("/api/admin/comments/:id", auth, adminOnly, async (req, res) => {
 
 async function seed() {
   const categories = db.collection("categories");
-  if (await categories.countDocuments() === 0) {
-    await categories.insertMany([
-      { name: "สุนัข", description: "สัตว์เลี้ยงลูกด้วยนมกลุ่มสุนัข", createdAt: new Date() },
-      { name: "แมว", description: "สัตว์เลี้ยงลูกด้วยนมกลุ่มแมว", createdAt: new Date() },
-      { name: "นก", description: "สัตว์ปีกที่เหมาะสำหรับเลี้ยง", createdAt: new Date() },
-      { name: "ปลา", description: "สัตว์น้ำสำหรับเลี้ยงในตู้หรือบ่อ", createdAt: new Date() },
-      { name: "สัตว์เลื้อยคลาน", description: "สัตว์เลื้อยคลานหลากหลายชนิด", createdAt: new Date() },
-      { name: "สัตว์ฟันแทะ", description: "สัตว์ฟันแทะขนาดเล็ก", createdAt: new Date() }
-    ]);
+  // Add missing defaults even when the database already has some categories.
+  const defaultCategories = [
+    { name: "สุนัข", description: "สัตว์เลี้ยงลูกด้วยนมกลุ่มสุนัข" },
+    { name: "แมว", description: "ข้อมูลสายพันธุ์แมวสำหรับระบบแนะนำสัตว์เลี้ยง" },
+    { name: "นก", description: "สัตว์ปีกที่เหมาะสำหรับเลี้ยง" },
+    { name: "ปลา", description: "สัตว์น้ำสำหรับเลี้ยงในตู้หรือบ่อ" },
+    { name: "สัตว์ฟันแทะ", description: "สัตว์ฟันแทะขนาดเล็ก" },
+    { name: "สัตว์เลื้อยคลาน", description: "สัตว์เลื้อยคลานหลากหลายชนิด" }
+  ];
+  for (const category of defaultCategories) {
+    await categories.updateOne(
+      { name: category.name },
+      { $setOnInsert: { description: category.description, createdAt: new Date() } },
+      { upsert: true }
+    );
   }
-  await categories.updateOne(
-    { name: "แมว" },
-    { $setOnInsert: { description: "ข้อมูลสายพันธุ์แมวสำหรับระบบแนะนำสัตว์เลี้ยง", createdAt: new Date() } },
-    { upsert: true }
-  );
 
   const users = db.collection("users");
   const adminEmail = "admin@petguide.com";
@@ -1134,6 +1309,9 @@ async function start() {
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
   db = client.db(DB_NAME);
+  await db.collection("communityPosts").createIndex({ category: 1, type: 1, _id: -1 });
+  await db.collection("communityPosts").createIndex({ status: 1, _id: -1 });
+  await db.collection("communityPosts").createIndex({ userId: 1, _id: -1 });
   await seed();
   app.listen(PORT, () => {
     console.log(`PetGuide running at http://localhost:${PORT}`);
@@ -1141,10 +1319,12 @@ async function start() {
   });
 }
 
-start().catch(err => {
-  console.error("Cannot start server:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  start().catch(err => {
+    console.error("Cannot start server:", err);
+    process.exit(1);
+  });
+}
 
 // ---------- Update Profile ----------
 app.put("/api/auth/profile", auth, async (req, res) => {
@@ -1181,4 +1361,4 @@ app.put("/api/auth/profile", auth, async (req, res) => {
   }
 });
 
-
+module.exports = { communityRoutes };

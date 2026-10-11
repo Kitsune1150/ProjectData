@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>จัดการชุมชน | PetGuide Admin</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header><nav class="site-navbar"><div class="nav-inner">
+    <a class="brand" href="admin.html"><span class="brand-mark">🐾</span><span><strong>PetGuide Admin</strong><small>ระบบหลังบ้าน</small></span></a>
+    <button class="nav-toggle" type="button" aria-label="เปิดเมนู" onclick="document.body.classList.toggle('nav-open')"><span></span><span></span><span></span></button>
+    <div class="nav-menu"><div class="nav-main"><a href="admin.html">จัดการสัตว์เลี้ยง</a><a href="admin-community.html">จัดการชุมชน</a><a href="community.html">ดูหน้าชุมชน</a></div><div class="nav-actions" id="nav-auth"></div></div>
+  </div></nav></header>
+  <main class="container community-page admin-community-page">
+    <div class="page-title"><p class="eyebrow">COMMUNITY MODERATION</p><h1>จัดการชุมชน</h1><p>ตรวจสอบบทความ คำถาม และรูปภาพก่อนเผยแพร่ในชุมชน</p></div>
+    <section id="community-moderation" class="panel moderation-section">
+      <h2>ตรวจสอบโพสต์</h2>
+      <p>หากไม่อนุมัติ เลือกเหตุผลได้หลายข้อจากรายการ เจ้าของโพสต์จะได้รับแจ้งเหตุผลทั้งหมด</p>
+      <div class="moderation-toolbar"><label for="moderation-status">สถานะโพสต์</label><select id="moderation-status"><option value="pending">รอตรวจสอบ</option><option value="approved">อนุมัติแล้ว</option><option value="rejected">ไม่อนุมัติ</option><option value="all">ทุกสถานะ</option></select><button type="button" id="moderation-refresh" class="btn btn-light">รีเฟรชรายการ</button></div>
+      <p id="moderation-message" role="status" aria-live="polite"></p>
+      <div id="moderation-posts"></div>
+      <button type="button" id="moderation-more" class="btn btn-light" hidden>โหลดเพิ่มเติม</button>
+    </section>
+  </main>
+  <footer>© 2026 PetGuide</footer>
+  <script src="/js/app.js"></script>
+  <script src="/js/community-admin.js"></script>
+</body>
+</html>
