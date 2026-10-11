@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ชุมชน | PetGuide</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header><nav class="site-navbar"><div class="nav-inner">
+    <a class="brand" href="index.html"><span class="brand-mark">🐾</span><span><strong>PetGuide</strong><small>คู่มือเลือกสัตว์เลี้ยง</small></span></a>
+    <button class="nav-toggle" type="button" aria-label="เปิดเมนู" onclick="document.body.classList.toggle('nav-open')"><span></span><span></span><span></span></button>
+    <div class="nav-menu"><div class="nav-main">
+      <a href="index.html">หน้าแรก</a><a href="pets.html">สายพันธุ์</a><a href="recommend.html">ช่วยเลือกสัตว์เลี้ยง</a><a href="favorites.html">รายการโปรด</a><a href="community.html">ชุมชน</a>
+    </div><div class="nav-actions" id="nav-auth"></div></div>
+  </div></nav></header>
+  <main class="container community-page">
+    <div class="page-title"><p class="eyebrow">PETGUIDE COMMUNITY</p><h1>ชุมชนคนรักสัตว์เลี้ยง</h1><p>แชร์ประสบการณ์ ตั้งคำถาม และพูดคุยกับเพื่อนที่รักสัตว์เหมือนกัน</p></div>
+    <div class="community-layout">
+      <aside class="community-sidebar community-card">
+        <h2>สำรวจโพสต์</h2>
+        <label for="filter-scope">แสดงโพสต์</label><select id="filter-scope"><option value="all">ชุมชนทั้งหมด</option><option value="mine" id="mine-option" hidden>โพสต์ของฉัน (ทุกสถานะ)</option></select>
+        <label for="filter-category">หมวดสัตว์เลี้ยง</label><select id="filter-category"><option value="">ทุกหมวด</option></select>
+        <label for="filter-type">ประเภทโพสต์</label><select id="filter-type"><option value="">ทั้งหมด</option><option value="article">บทความ</option><option value="question">คำถาม</option></select>
+        <p>พื้นที่แบ่งปันความรู้และประสบการณ์ ชวนคุยด้วยความสุภาพและเคารพกัน</p>
+      </aside>
+      <section class="community-main" aria-label="ฟีดชุมชน">
+        <section id="community-notifications" class="community-card community-notifications" aria-label="ผลการตรวจสอบโพสต์" hidden></section>
+        <div class="community-feed-toolbar"><a id="community-admin-link" href="admin-community.html" hidden>ตรวจสอบโพสต์ชุมชน</a><button type="button" id="refresh-community" class="community-text-button">↻ รีเฟรชโพสต์และการแจ้งเตือน</button></div>
+        <section class="community-card" id="composer">
+          <div id="login-hint" hidden><p>เข้าสู่ระบบเพื่อโพสต์ คอมเมนต์ และตอบกลับเพื่อนในชุมชน</p><a class="btn btn-primary" href="login.html">เข้าสู่ระบบ</a> <a class="btn btn-light" href="register.html">สมัครสมาชิก</a></div>
+          <div id="composer-launcher" hidden>
+            <div class="composer-prompt-row"><span class="community-avatar composer-avatar" aria-hidden="true">🐾</span><button type="button" id="open-composer" class="composer-prompt" aria-haspopup="dialog">คุณกำลังคิดอะไรอยู่?</button></div>
+            <div class="composer-actions">
+              <button type="button" id="open-photo-post"><span aria-hidden="true">🖼️</span> รูปภาพ</button>
+              <button type="button" id="open-article-post"><span aria-hidden="true">📝</span> เขียนบทความ</button>
+              <button type="button" id="open-question-post"><span aria-hidden="true">💬</span> ตั้งคำถาม</button>
+            </div>
+          </div>
+        </section>
+        <p id="community-status" role="status" aria-live="polite"></p>
+        <div id="community-feed"></div>
+        <button id="load-more" class="btn btn-light" type="button" hidden>โหลดโพสต์เพิ่มเติม</button>
+      </section>
+    </div>
+    <dialog id="post-dialog" class="post-dialog" aria-labelledby="post-dialog-title">
+      <div class="post-dialog-header"><h2 id="post-dialog-title">สร้างโพสต์</h2><button type="button" id="close-composer" class="post-dialog-close" aria-label="ปิดหน้าต่างสร้างโพสต์">×</button></div>
+      <div class="post-dialog-body">
+        <div class="community-author"><span class="community-avatar composer-avatar" aria-hidden="true">🐾</span><div><strong id="composer-username"></strong><p class="community-meta">แบ่งปันกับชุมชนคนรักสัตว์เลี้ยง</p></div></div>
+          <form id="post-form">
+            <div class="community-fields"><div><label for="post-type">ประเภทโพสต์</label><select id="post-type" name="type"><option value="article">บทความ / แบ่งปันประสบการณ์</option><option value="question">ตั้งคำถาม</option></select></div><div><label for="post-category">หมวดสัตว์เลี้ยง</label><select id="post-category" name="category" required><option value="">เลือกหมวดสัตว์เลี้ยง</option></select></div></div>
+            <label for="post-title">หัวข้อ</label><input id="post-title" name="title" maxlength="160" required placeholder="เรื่องราวหรือคำถามของคุณ" />
+            <label for="post-content" class="visually-hidden">เนื้อหา</label><textarea id="post-content" name="content" rows="5" maxlength="10000" required placeholder="คุณกำลังคิดอะไรอยู่?"></textarea>
+            <div class="post-attachments"><span>เพิ่มลงในโพสต์ของคุณ</span><button type="button" id="choose-post-images" class="post-photo-button" aria-label="แนบรูปภาพ"><span aria-hidden="true">🖼️</span> รูปภาพ</button></div>
+            <label for="post-images" class="visually-hidden">แนบรูปภาพ</label><input id="post-images" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
+            <p class="community-meta">แนบได้สูงสุด 4 รูป รูปละไม่เกิน 5 MB</p>
+            <p id="post-review-hint" class="community-meta">โพสต์จะเผยแพร่หลังแอดมินตรวจสอบและอนุมัติ คุณติดตามผลได้ที่ “โพสต์ของฉัน”</p>
+            <div id="image-preview" class="community-images"></div>
+            <button class="btn btn-primary" type="submit" id="publish" disabled>โพสต์</button>
+          </form>
+      </div>
+    </dialog>
+  </main>
+  <footer>© 2026 PetGuide</footer>
+  <script src="/js/app.js"></script><script src="/js/community.js"></script>
+</body>
+</html>
