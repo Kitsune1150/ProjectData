@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>รายละเอียดสัตว์ | PetGuide</title>
+  <title>รายละเอียดสัตว์ | Petty Boo</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 
@@ -15,7 +15,7 @@
         <a class="brand" href="index.html">
           <span class="brand-mark">🐾</span>
           <span>
-            <strong>PetGuide</strong>
+            <strong>Petty Boo</strong>
             <small>คู่มือเลือกสัตว์เลี้ยง</small>
           </span>
         </a>
@@ -42,7 +42,7 @@
 
   <main class="container" id="detail"></main>
 
-  <footer>© 2026 PetGuide</footer>
+  <footer>© 2026 Petty Boo</footer>
 
   <script src="/js/app.js"></script>
   <script>
@@ -101,7 +101,7 @@
       }
 
       const pet = await fetchJSON("/api/pets/" + id);
-      document.title = pet.name + " | PetGuide";
+      document.title = pet.name + " | Petty Boo";
 
       const isFav = favoriteIds.has(pet._id);
       const btnText = isFav ? "♥ อยู่ในรายการโปรดแล้ว" : "♡ เพิ่มรายการโปรด";

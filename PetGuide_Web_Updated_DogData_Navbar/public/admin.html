@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin | PetGuide</title>
+  <title>Admin | Petty Boo</title>
   <link rel="stylesheet" href="/css/style.css" />
   <style>
     /* CSS สำหรับ Pop-up Modal */
@@ -73,7 +73,7 @@
         <a class="brand" href="admin.html">
           <span class="brand-mark">🐾</span>
           <span>
-            <strong>PetGuide Admin</strong>
+            <strong>Petty Boo Admin</strong>
             <small>ระบบหลังบ้าน</small>
           </span>
         </a>
@@ -89,9 +89,9 @@
             <a href="admin-community.html">จัดการชุมชน</a>
           </div>
 
-          <div class="nav-actions" id="nav-auth">
-            <span style="font-size: 0.9rem; color: #666; margin-right: 8px;">ผู้ดูแลระบบ</span>
-            <button class="btn btn-light" onclick="logout()" style="padding: 6px 12px;">ออกจากระบบ</button>
+          <div class="nav-actions admin-nav-actions" id="nav-auth">
+            <span class="admin-account-name">admin</span>
+            <button class="btn btn-light admin-logout" onclick="logout()">ออกจากระบบ</button>
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@
   <main class="container">
     <div class="page-title">
       <p class="eyebrow">ADMIN PANEL</p>
-      <h1>จัดการข้อมูลสัตว์เลี้ยงและระบบ</h1>
+      <h1>&#xe08;&#xe31;&#xe14;&#xe01;&#xe32;&#xe23;&#xe2a;&#xe31;&#xe15;&#xe27;&#xe4c;</h1>
     </div>
 
     <!-- กล่องสถิติ -->
@@ -172,7 +172,7 @@
               </select>
             </div>
             <div class="field">
-              <label for="grooming">การดูแลขน</label>
+              <label for="grooming">การดูแลขน/ร่างกาย</label>
               <select id="grooming">
                 <option>ต่ำ</option>
                 <option selected>ปานกลาง</option>

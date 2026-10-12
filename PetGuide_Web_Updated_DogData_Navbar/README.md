@@ -1,4 +1,4 @@
-# PetGuide Updated
+# Petty Boo Updated
 
 ## ชุมชน
 API ชุมชนรวมอยู่ใน `server.js` ส่วน CSS ของหน้าชุมชนและหน้าจัดการชุมชนรวมอยู่ใน `public/css/style.css` โดย JavaScript ที่ทำงานในเบราว์เซอร์ยังอยู่ใน `public/js/community.js` และ `public/js/community-admin.js`
@@ -13,7 +13,7 @@ API ชุมชนรวมอยู่ใน `server.js` ส่วน CSS ข�
 
 ทดสอบ API ด้วย `npm test` โดยต้องมี MongoDB ในเครื่องที่พอร์ต 27017 หรือกำหนด `COMMUNITY_TEST_MONGODB_URI` การทดสอบใช้ฐานข้อมูลชั่วคราวชื่อ `petguide_community_test_*` และลบทิ้งหลังเสร็จ โดยไม่ใช้ฐานข้อมูลแอป
 
-เว็บ PetGuide ชุดเดิมที่เพิ่มข้อมูลสุนัข 30 สายพันธุ์จากเอกสารที่ให้มา และปรับ Navbar ใหม่
+เว็บ Petty Boo ชุดเดิมที่เพิ่มข้อมูลสุนัข 30 สายพันธุ์จากเอกสารที่ให้มา และปรับ Navbar ใหม่
 
 ## ปรับแล้ว
 - `server.js` seed ข้อมูลสุนัข 30 สายพันธุ์

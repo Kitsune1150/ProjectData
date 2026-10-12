@@ -63,14 +63,15 @@ function safeUrl(url) {
 // ==========================================
 
 async function api(url, options = {}) {
+  const { silent = false, ...requestOptions } = options;
   const token = getToken();
   const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: "Bearer " + token } : {}),
-    ...options.headers,
+    ...requestOptions.headers,
   };
 
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(url, { ...requestOptions, headers });
   const responseText = await res.text();
   let data = {};
   try {
@@ -87,10 +88,10 @@ async function api(url, options = {}) {
           ? "ไฟล์ใหญ่เกินขนาดที่เซิร์ฟเวอร์รับได้ กรุณาเลือกรูปที่เล็กลง"
           : `เซิร์ฟเวอร์ตอบกลับ HTTP ${res.status}`
     );
-    alert(message);
+    if (!silent) alert(message);
     const error = new Error(message);
     error.status = res.status;
-    error.alerted = true;
+    error.alerted = !silent;
     throw error;
   }
   return data;
@@ -195,10 +196,10 @@ function loadAuthNav() {
   if (user && user.username) {
     // แสดงชื่อผู้ใช้เป็นข้อความสีเขียวเข้ม (#1b4332) + ปุ่มออกจากระบบ
     authContainer.innerHTML = `
-      <span style="font-size: 0.95rem; color: #1b4332; margin-right: 12px; font-weight: 500;">
-        ${escapeHtml(user.username)}
+      <span class="admin-account-name">
+        ${escapeHtml(user.role === "admin" && ["admin.html", "admin-community.html"].includes(location.pathname.split("/").pop()) ? "admin" : user.username)}
       </span>
-      <button type="button" class="btn btn-light" onclick="logout()">ออกจากระบบ</button>
+      <button type="button" class="btn btn-light admin-logout" onclick="logout()">ออกจากระบบ</button>
     `;
   } else {
     // กรณีไม่ได้เข้าสู่ระบบ
