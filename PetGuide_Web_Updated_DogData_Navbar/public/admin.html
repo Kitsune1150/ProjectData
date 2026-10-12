@@ -826,11 +826,7 @@
     }
 
     function logout() {
-      if (confirm("คุณต้องการออกจากระบบหรือไม่?")) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        location.href = "/login.html";
-      }
+      showLogoutDialog();
     }
 
     document.addEventListener("DOMContentLoaded", () => {

@@ -211,12 +211,52 @@ function loadAuthNav() {
 }
 
 // ฟังก์ชันออกจากระบบ
-function logout() {
-  if (confirm("ต้องการออกจากระบบหรือไม่?")) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    location.href = "login.html";
+let logoutFocusReturn = null;
+
+function closeLogoutDialog() {
+  const overlay = document.getElementById("logout-confirm-dialog");
+  if (!overlay) return;
+  overlay.hidden = true;
+  document.body.classList.remove("dialog-open");
+  if (logoutFocusReturn && document.contains(logoutFocusReturn)) logoutFocusReturn.focus();
+}
+
+function showLogoutDialog() {
+  logoutFocusReturn = document.activeElement;
+  let overlay = document.getElementById("logout-confirm-dialog");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "logout-confirm-dialog";
+    overlay.className = "logout-confirm-overlay";
+    overlay.hidden = true;
+    overlay.innerHTML = `
+      <section class="logout-confirm-card" role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title" aria-describedby="logout-dialog-description">
+        <div class="logout-confirm-icon" aria-hidden="true">&#x2197;</div>
+        <p class="logout-confirm-eyebrow">PETTY BOO</p>
+        <h2 id="logout-dialog-title">&#x0e2d;&#x0e2d;&#x0e01;&#x0e08;&#x0e32;&#x0e01;&#x0e23;&#x0e30;&#x0e1a;&#x0e1a;</h2>
+        <p id="logout-dialog-description">&#x0e15;&#x0e49;&#x0e2d;&#x0e07;&#x0e01;&#x0e32;&#x0e23;&#x0e2d;&#x0e2d;&#x0e01;&#x0e08;&#x0e32;&#x0e01;&#x0e1a;&#x0e31;&#x0e0d;&#x0e0a;&#x0e35;&#x0e19;&#x0e35;&#x0e49;&#x0e2b;&#x0e23;&#x0e37;&#x0e2d;&#x0e44;&#x0e21;&#x0e48;</p>
+        <div class="logout-confirm-actions">
+          <button type="button" class="btn btn-light" data-cancel-logout>&#x0e22;&#x0e31;&#x0e07;&#x0e2d;&#x0e22;&#x0e39;&#x0e48;&#x0e43;&#x0e19;&#x0e23;&#x0e30;&#x0e1a;&#x0e1a;</button>
+          <button type="button" class="btn logout-confirm-submit" data-confirm-logout>&#x0e2d;&#x0e2d;&#x0e01;&#x0e08;&#x0e32;&#x0e01;&#x0e23;&#x0e30;&#x0e1a;&#x0e1a;</button>
+        </div>
+      </section>`;
+    document.body.append(overlay);
+    overlay.querySelector("[data-cancel-logout]").addEventListener("click", closeLogoutDialog);
+    overlay.querySelector("[data-confirm-logout]").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      location.href = "/login.html";
+    });
+    overlay.addEventListener("click", event => { if (event.target === overlay) closeLogoutDialog(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape" && !overlay.hidden) closeLogoutDialog(); });
   }
+  overlay.hidden = false;
+  document.body.classList.add("dialog-open");
+  overlay.querySelector("[data-cancel-logout]").focus();
+}
+
+function logout() {
+  showLogoutDialog();
 }
 
 

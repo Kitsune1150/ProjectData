@@ -2019,6 +2019,34 @@ main.container > #result {
 .moderation-post h3 { overflow-wrap: anywhere; }
 .admin-delete-post { background: #fff0f0; color: #a52828; border: 1px solid #edcaca; }
 .admin-delete-post:hover { background: #ffe3e3; }
+.favorite-action-message { min-height: 1.5em; margin: -32px 0 16px; color: #245b38; font-size: 14px; }
+.favorite-action-message:empty { display: none; }
+
+
+.register-success-overlay { position: fixed; inset: 0; z-index: 2200; display: grid; place-items: center; padding: 20px; background: rgba(20, 35, 27, .5); backdrop-filter: blur(6px); }
+.register-success-overlay[hidden] { display: none; }
+.register-success-card { width: min(100%, 440px); padding: 34px 30px; border: 1px solid #e5eee7; border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(16, 40, 27, .22); text-align: center; animation: admin-dialog-in .2s ease-out; }
+.register-success-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 18px; border-radius: 20px; background: #e8f6ec; color: #21834a; font-size: 30px; font-weight: 800; }
+.register-success-eyebrow { margin: 0 0 7px; color: #789083; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.register-success-card h2 { margin: 0 0 10px; color: #183b2a; font-size: 22px; }
+.register-success-card > p:not(.register-success-eyebrow) { margin: 0; color: #66766c; line-height: 1.7; }
+.register-success-link { display: inline-flex; justify-content: center; align-items: center; min-height: 46px; margin-top: 24px; padding: 10px 22px; text-decoration: none; }
+@media (max-width: 480px) { .register-success-card { padding: 28px 22px; border-radius: 20px; } .register-success-card h2 { font-size: 20px; } }
+
+.logout-confirm-overlay { position: fixed; inset: 0; z-index: 2100; display: grid; place-items: center; padding: 20px; background: rgba(20, 35, 27, .48); backdrop-filter: blur(6px); }
+.logout-confirm-overlay[hidden] { display: none; }
+body.dialog-open { overflow: hidden; }
+.logout-confirm-card { width: min(100%, 430px); padding: 30px; border: 1px solid #e5eee7; border-radius: 22px; background: #fff; box-shadow: 0 24px 70px rgba(16, 40, 27, .22); text-align: center; animation: admin-dialog-in .18s ease-out; }
+.logout-confirm-icon { display: grid; place-items: center; width: 54px; height: 54px; margin: 0 auto 16px; border-radius: 18px; background: #edf5f0; color: #245b38; font-size: 25px; font-weight: 700; }
+.logout-confirm-eyebrow { margin: 0 0 6px; color: #789083; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.logout-confirm-card h2 { margin: 0 0 8px; color: #183b2a; font-size: 22px; }
+.logout-confirm-card > p:not(.logout-confirm-eyebrow) { margin: 0; color: #66766c; line-height: 1.65; }
+.logout-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+.logout-confirm-actions button { min-height: 44px; padding: 10px 14px; }
+.logout-confirm-submit { background: #a52828; color: #fff; }
+.logout-confirm-submit:hover { background: #871f1f; }
+@media (max-width: 480px) { .logout-confirm-card { padding: 24px 20px; border-radius: 18px; } .logout-confirm-actions { grid-template-columns: 1fr; } }
+
 
 .admin-confirm-overlay { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 20px; background: rgba(20, 35, 27, .48); backdrop-filter: blur(5px); }
 .admin-confirm-overlay[hidden] { display: none; }
