@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="th">
 
 <head>
@@ -50,7 +50,7 @@
       return `<div class="info-card"><h3>${title}</h3><p>${escapeHtml(text || "-")}</p></div>`;
     }
 
-    // ฟังก์ชันจัดการการกดปุ่มรายการโปรดแบบไม่รีเฟรชหน้า[cite: 7]
+    // ฟังก์ชันจัดการการกดปุ่มรายการโปรดแบบไม่รีเฟรชหน้า
     async function toggleDetailFavorite(event, petId, btnEl) {
       if (event) event.preventDefault();
 
@@ -85,7 +85,7 @@
 
       await api("/api/pets/" + id + "/comments", {
         method: "POST",
-        body: JSON.stringify({ comment: text, rating: 5 }),
+        body: JSON.stringify({ comment: text }),
       });
       location.reload();
     }
@@ -160,7 +160,6 @@
               (c) =>
                 `<div class="comment">
                   <b>${escapeHtml(c.username)}</b>
-                  <span>⭐ ${c.rating || 5}</span>
                   <p>${escapeHtml(c.comment)}</p>
                 </div>`
             )
@@ -172,7 +171,7 @@
       if (me) {
         document.getElementById("commentForm").innerHTML = `
           <textarea id="comment" placeholder="เขียนความคิดเห็นของคุณที่นี่..."></textarea>
-          <button class="btn btn-primary" onclick="comment('${id}')">ส่งความคิดเห็น</button>
+          <button class="btn btn-primary" onclick="comment('${id}')" style="margin-top: 10px;">ส่งความคิดเห็น</button>
         `;
       } else {
         document.getElementById("commentForm").innerHTML = `
