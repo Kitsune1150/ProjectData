@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Register | PetGuide</title>
+    <title>Register | Petty Boo</title>
     <link rel="stylesheet" href="/css/style.css" />
     <style>
       .auth-container {
@@ -37,9 +37,9 @@
       </div>
 
       <div class="auth-card" style="width: 100%;">
-        <a class="brand" href="index.html">🐾 PetGuide</a>
+        <a class="brand" href="index.html">🐾 Petty Boo</a>
         <h1>สมัครสมาชิก</h1>
-        <p>สร้างบัญชีเพื่อเข้าใช้งานทุกฟังก์ชันของ PetGuide</p>
+        <p>สร้างบัญชีเพื่อเข้าใช้งานทุกฟังก์ชันของ Petty Boo</p>
 
         <form id="form">
           <input id="username" placeholder="ชื่อผู้ใช้" required />
@@ -48,31 +48,50 @@
           <button class="btn btn-primary">สมัครสมาชิก</button>
         </form>
 
-        <p id="msg" style="color: var(--danger); margin-top: 10px;" class="text-center"></p>
+        <p id="msg" style="color: var(--danger); margin-top: 10px;" class="text-center" aria-live="polite"></p>
 
         <p class="text-center">มีบัญชีแล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
       </div>
     </div>
 
+      <div id="register-success" class="register-success-overlay" hidden>
+        <section class="register-success-card" role="dialog" aria-modal="true" aria-labelledby="register-success-title" aria-describedby="register-success-description">
+          <div class="register-success-icon" aria-hidden="true">&#x2713;</div>
+          <p class="register-success-eyebrow">PETTY BOO</p>
+          <h2 id="register-success-title">&#x0e2a;&#x0e21;&#x0e31;&#x0e04;&#x0e23;&#x0e2a;&#x0e21;&#x0e32;&#x0e0a;&#x0e34;&#x0e01;&#x0e2a;&#x0e33;&#x0e40;&#x0e23;&#x0e47;&#x0e08;</h2>
+          <p id="register-success-description">&#x0e1a;&#x0e31;&#x0e0d;&#x0e0a;&#x0e35;&#x0e02;&#x0e2d;&#x0e07;&#x0e04;&#x0e38;&#x0e13;&#x0e1e;&#x0e23;&#x0e49;&#x0e2d;&#x0e21;&#x0e43;&#x0e0a;&#x0e49;&#x0e07;&#x0e32;&#x0e19;&#x0e41;&#x0e25;&#x0e49;&#x0e27; &#x0e40;&#x0e02;&#x0e49;&#x0e32;&#x0e2a;&#x0e39;&#x0e48;&#x0e23;&#x0e30;&#x0e1a;&#x0e1a;&#x0e40;&#x0e1e;&#x0e37;&#x0e48;&#x0e2d;&#x0e14;&#x0e33;&#x0e40;&#x0e19;&#x0e34;&#x0e19;&#x0e01;&#x0e32;&#x0e23;&#x0e15;&#x0e48;&#x0e2d;</p>
+          <a href="login.html" class="btn btn-primary register-success-link">&#x0e44;&#x0e1b;&#x0e2b;&#x0e19;&#x0e49;&#x0e32;&#x0e40;&#x0e02;&#x0e49;&#x0e32;&#x0e2a;&#x0e39;&#x0e48;&#x0e23;&#x0e30;&#x0e1a;&#x0e1a;</a>
+        </section>
+      </div>
     <script src="/js/app.js"></script>
     <script>
-      form.onsubmit = async (e) => {
-        e.preventDefault();
+      const registerForm = document.getElementById("form");
+      const registerMessage = document.getElementById("msg");
+      const registerSuccess = document.getElementById("register-success");
+      registerForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const submitButton = registerForm.querySelector("button");
+        submitButton.disabled = true;
+        registerMessage.textContent = "";
         try {
           await api("/api/auth/register", {
             method: "POST",
             body: JSON.stringify({
-              username: username.value,
-              email: email.value,
-              password: password.value,
+              username: document.getElementById("username").value,
+              email: document.getElementById("email").value,
+              password: document.getElementById("password").value,
             }),
+            silent: true,
           });
-          alert("สมัครสมาชิกสำเร็จ");
-          location.href = "login.html";
-        } catch (e) {
-          msg.textContent = e.message;
+          registerForm.querySelectorAll("input, button").forEach((control) => { control.disabled = true; });
+          registerSuccess.hidden = false;
+          registerSuccess.querySelector("a").focus();
+        } catch (error) {
+          registerMessage.textContent = error.message;
+          registerMessage.setAttribute("role", "alert");
+          submitButton.disabled = false;
         }
-      };
+      });
     </script>
   </body>
 </html>

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>รายการโปรด | PetGuide</title>
+  <title>รายการโปรด | Petty Boo</title>
   <link rel="stylesheet" href="/css/style.css" />
   <style>
     .pet-card {
@@ -51,7 +51,7 @@
       <div class="nav-inner">
         <a class="brand" href="index.html">
           <span class="brand-mark">🐾</span>
-          <span><strong>PetGuide</strong><small>คู่มือเลือกสัตว์เลี้ยง</small></span>
+          <span><strong>Petty Boo</strong><small>คู่มือเลือกสัตว์เลี้ยง</small></span>
         </a>
         <button class="nav-toggle" type="button" aria-label="เปิดเมนู"
           onclick="document.body.classList.toggle('nav-open')">
@@ -75,10 +75,23 @@
     <div class="page-title">
       <h1>สัตว์เลี้ยงที่ฉันสนใจ</h1>
     </div>
+    <p id="favorite-message" class="favorite-action-message" role="status" aria-live="polite" tabindex="-1"></p>
     <div id="list" class="pet-grid"></div>
   </main>
 
-  <footer>© 2026 PetGuide</footer>
+  <div id="favorite-remove-dialog" class="admin-confirm-overlay" hidden>
+    <section class="admin-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="favorite-remove-title" aria-describedby="favorite-remove-description">
+      <div class="admin-confirm-icon" aria-hidden="true">&#x2661;</div>
+      <h2 id="favorite-remove-title">&#x0e19;&#x0e33;&#x0e2d;&#x0e2d;&#x0e01;&#x0e08;&#x0e32;&#x0e01;&#x0e23;&#x0e32;&#x0e22;&#x0e01;&#x0e32;&#x0e23;&#x0e42;&#x0e1b;&#x0e23;&#x0e14;</h2>
+      <p id="favorite-remove-description">&#x0e04;&#x0e38;&#x0e13;&#x0e15;&#x0e49;&#x0e2d;&#x0e07;&#x0e01;&#x0e32;&#x0e23;&#x0e19;&#x0e33;&#x0e2a;&#x0e31;&#x0e15;&#x0e27;&#x0e4c;&#x0e19;&#x0e35;&#x0e49;&#x0e2d;&#x0e2d;&#x0e01;&#x0e08;&#x0e32;&#x0e01;&#x0e23;&#x0e32;&#x0e22;&#x0e01;&#x0e32;&#x0e23;&#x0e42;&#x0e1b;&#x0e23;&#x0e14;&#x0e2b;&#x0e23;&#x0e37;&#x0e2d;&#x0e44;&#x0e21;&#x0e48;</p>
+      <p id="favorite-remove-error" class="admin-confirm-error" role="alert" hidden></p>
+      <div class="admin-confirm-actions">
+        <button type="button" id="cancel-favorite-remove" class="btn btn-light">&#x0e22;&#x0e31;&#x0e07;&#x0e40;&#x0e01;&#x0e47;&#x0e1a;&#x0e44;&#x0e27;&#x0e49;</button>
+        <button type="button" id="confirm-favorite-remove" class="btn admin-delete-post">&#x0e19;&#x0e33;&#x0e2d;&#x0e2d;&#x0e01;</button>
+      </div>
+    </section>
+  </div>
+  <footer>© 2026 Petty Boo</footer>
   <script src="/js/app.js"></script>
   <script>
     // ฟังก์ชัน Render การ์ดคู่กับปุ่มกากบาท
@@ -120,32 +133,66 @@
     }
 
     // ฟังก์ชันกดยกเลิกชอบ (ใช้ btnTarget ลบการ์ดใบที่กดโดยตรง)
-    async function removeFavorite(event, petId, btnTarget) {
-      event.stopPropagation(); // ป้องกันการคลิกซ้อนทับ
+    const favoriteDialog = document.getElementById("favorite-remove-dialog");
+    const favoriteRemoveDescription = document.getElementById("favorite-remove-description");
+    const favoriteRemoveError = document.getElementById("favorite-remove-error");
+    const confirmFavoriteRemove = document.getElementById("confirm-favorite-remove");
+    let favoritePendingRemoval = null;
 
-      if (!confirm("ต้องการลบออกจากรายการโปรดหรือไม่?")) return;
+    function closeFavoriteRemoveDialog(restoreFocus = true) {
+      favoriteDialog.hidden = true;
+      document.body.classList.remove("dialog-open");
+      favoriteRemoveError.hidden = true;
+      confirmFavoriteRemove.disabled = false;
+      const target = favoritePendingRemoval?.button;
+      favoritePendingRemoval = null;
+      if (restoreFocus && target?.isConnected) target.focus();
+    }
 
+    function removeFavorite(event, petId, btnTarget) {
+      event.stopPropagation();
+      favoritePendingRemoval = { petId, button: btnTarget };
+      favoriteRemoveDescription.textContent = btnTarget.closest(".pet-card")?.querySelector("h3")?.textContent || "This favorite";
+      favoriteRemoveError.hidden = true;
+      favoriteDialog.hidden = false;
+      document.body.classList.add("dialog-open");
+      document.getElementById("cancel-favorite-remove").focus();
+    }
+
+    async function confirmRemoveFavorite() {
+      if (!favoritePendingRemoval || confirmFavoriteRemove.disabled) return;
+      const { petId, button } = favoritePendingRemoval;
+      confirmFavoriteRemove.disabled = true;
+      favoriteRemoveError.hidden = true;
       try {
-        await api(`/api/favorites/${petId}`, { method: "DELETE" });
-
-        // ลบ Element ของการ์ดใบนั้นๆ โดยใช้อ้างอิงจากปุ่มที่กดตรงๆ
-        const cardEl = btnTarget.closest('.pet-card');
-        if (cardEl) {
-          cardEl.remove();
-        }
-
-        // แสดงข้อความเมื่อไม่เหลือรายการโปรดแล้ว
+        const result = await api("/api/favorites/" + encodeURIComponent(petId), { method: "DELETE", silent: true });
+        const cardEl = button.closest(".pet-card");
+        if (cardEl) cardEl.remove();
+        favoriteIds.delete(petId);
         const listEl = document.getElementById("list");
         if (!listEl.querySelector(".pet-card")) {
-          listEl.innerHTML = `<div class="empty" style="grid-column: 1/-1; text-align: center; padding: 40px;">ยังไม่มีรายการโปรด</div>`;
+          listEl.innerHTML = '<div class="empty" style="grid-column: 1/-1; text-align: center; padding: 40px;">&#x0e22;&#x0e31;&#x0e07;&#x0e44;&#x0e21;&#x0e48;&#x0e21;&#x0e35;&#x0e23;&#x0e32;&#x0e22;&#x0e01;&#x0e32;&#x0e23;&#x0e42;&#x0e1b;&#x0e23;&#x0e14;</div>';
         }
-      } catch (e) {
-        alert("ไม่สามารถยกเลิกรายการโปรดได้ กรุณาลองใหม่อีกครั้ง");
-        console.error(e);
+        const message = document.getElementById("favorite-message");
+        message.textContent = result.message;
+        closeFavoriteRemoveDialog(false);
+        message.focus();
+      } catch (error) {
+        favoriteRemoveError.textContent = error.message || "Could not remove this favorite. Please try again.";
+        favoriteRemoveError.hidden = false;
+        confirmFavoriteRemove.disabled = false;
       }
     }
 
-    // เริ่มทำงานเมื่อเปิดหน้าเว็บ
+    document.getElementById("cancel-favorite-remove").addEventListener("click", () => closeFavoriteRemoveDialog());
+    confirmFavoriteRemove.addEventListener("click", confirmRemoveFavorite);
+    favoriteDialog.addEventListener("click", (event) => {
+      if (event.target === favoriteDialog) closeFavoriteRemoveDialog();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !favoriteDialog.hidden) closeFavoriteRemoveDialog();
+    });
+
     (async () => {
       await loadAuthNav();
       const user = getUser();

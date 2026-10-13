@@ -152,6 +152,19 @@ function communityRoutes(getDb, auth) {
     res.json({ message: "รับทราบแล้ว" });
   });
 
+  router.delete("/admin/posts/:id", auth, adminOnly, async (req, res) => {
+    if (!validId(req.params.id)) throw fail("Invalid post ID");
+    const post = await posts().findOneAndDelete({ _id: new ObjectId(req.params.id) });
+    if (!post) throw fail("Post not found", 404);
+    for (const image of post.images || []) {
+      const match = /^\/images\/community\/([a-f0-9]{32}\.(?:jpg|png|webp))$/.exec(image);
+      if (!match || await posts().countDocuments({ images: image })) continue;
+      try { await fs.unlink(path.join(imageDirectory, match[1])); }
+      catch (error) { if (error.code !== "ENOENT") console.error("Community image cleanup:", error); }
+    }
+    res.json({ message: "\u0e25\u0e1a\u0e42\u0e1e\u0e2a\u0e15\u0e4c\u0e41\u0e25\u0e49\u0e27" });
+  });
+
   router.delete("/posts/:id", auth, async (req, res) => {
     if (!validId(req.params.id)) throw fail("รหัสโพสต์ไม่ถูกต้อง");
     const post = await posts().findOneAndDelete({ _id: new ObjectId(req.params.id), userId: req.user.id });
@@ -1314,7 +1327,7 @@ async function start() {
   await db.collection("communityPosts").createIndex({ userId: 1, _id: -1 });
   await seed();
   app.listen(PORT, () => {
-    console.log(`PetGuide running at http://localhost:${PORT}`);
+    console.log(`Petty Boo running at http://localhost:${PORT}`);
     console.log(`MongoDB database: ${DB_NAME}`);
   });
 }

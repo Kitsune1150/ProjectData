@@ -661,6 +661,27 @@ button.danger {
     gap: 4px
 }
 
+.admin-nav-actions {
+    gap: 12px
+}
+
+.admin-account-name {
+    color: #1b4332;
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap
+}
+
+.admin-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 14px;
+    line-height: 1.2;
+    white-space: nowrap
+}
+
 .site-navbar .nav-main a,
 .site-navbar .nav-actions a {
     position: relative;
@@ -1996,7 +2017,51 @@ main.container > #result {
 .moderation-toolbar label { margin: 0; }
 .moderation-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .moderation-post h3 { overflow-wrap: anywhere; }
-.admin-community-page { max-width: 1000px; }
+.admin-delete-post { background: #fff0f0; color: #a52828; border: 1px solid #edcaca; }
+.admin-delete-post:hover { background: #ffe3e3; }
+.favorite-action-message { min-height: 1.5em; margin: -32px 0 16px; color: #245b38; font-size: 14px; }
+.favorite-action-message:empty { display: none; }
+
+
+.register-success-overlay { position: fixed; inset: 0; z-index: 2200; display: grid; place-items: center; padding: 20px; background: rgba(20, 35, 27, .5); backdrop-filter: blur(6px); }
+.register-success-overlay[hidden] { display: none; }
+.register-success-card { width: min(100%, 440px); padding: 34px 30px; border: 1px solid #e5eee7; border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(16, 40, 27, .22); text-align: center; animation: admin-dialog-in .2s ease-out; }
+.register-success-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 18px; border-radius: 20px; background: #e8f6ec; color: #21834a; font-size: 30px; font-weight: 800; }
+.register-success-eyebrow { margin: 0 0 7px; color: #789083; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.register-success-card h2 { margin: 0 0 10px; color: #183b2a; font-size: 22px; }
+.register-success-card > p:not(.register-success-eyebrow) { margin: 0; color: #66766c; line-height: 1.7; }
+.register-success-link { display: inline-flex; justify-content: center; align-items: center; min-height: 46px; margin-top: 24px; padding: 10px 22px; text-decoration: none; }
+@media (max-width: 480px) { .register-success-card { padding: 28px 22px; border-radius: 20px; } .register-success-card h2 { font-size: 20px; } }
+
+.logout-confirm-overlay { position: fixed; inset: 0; z-index: 2100; display: grid; place-items: center; padding: 20px; background: rgba(20, 35, 27, .48); backdrop-filter: blur(6px); }
+.logout-confirm-overlay[hidden] { display: none; }
+body.dialog-open { overflow: hidden; }
+.logout-confirm-card { width: min(100%, 430px); padding: 30px; border: 1px solid #e5eee7; border-radius: 22px; background: #fff; box-shadow: 0 24px 70px rgba(16, 40, 27, .22); text-align: center; animation: admin-dialog-in .18s ease-out; }
+.logout-confirm-icon { display: grid; place-items: center; width: 54px; height: 54px; margin: 0 auto 16px; border-radius: 18px; background: #edf5f0; color: #245b38; font-size: 25px; font-weight: 700; }
+.logout-confirm-eyebrow { margin: 0 0 6px; color: #789083; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.logout-confirm-card h2 { margin: 0 0 8px; color: #183b2a; font-size: 22px; }
+.logout-confirm-card > p:not(.logout-confirm-eyebrow) { margin: 0; color: #66766c; line-height: 1.65; }
+.logout-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+.logout-confirm-actions button { min-height: 44px; padding: 10px 14px; }
+.logout-confirm-submit { background: #a52828; color: #fff; }
+.logout-confirm-submit:hover { background: #871f1f; }
+@media (max-width: 480px) { .logout-confirm-card { padding: 24px 20px; border-radius: 18px; } .logout-confirm-actions { grid-template-columns: 1fr; } }
+
+
+.admin-confirm-overlay { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 20px; background: rgba(20, 35, 27, .48); backdrop-filter: blur(5px); }
+.admin-confirm-overlay[hidden] { display: none; }
+.admin-confirm-dialog { width: min(100%, 440px); padding: 28px; border: 1px solid #e5eee7; border-radius: 20px; background: #fff; box-shadow: 0 24px 70px rgba(16, 40, 27, .22); animation: admin-dialog-in .18s ease-out; }
+.admin-confirm-icon { display: grid; place-items: center; width: 46px; height: 46px; margin-bottom: 16px; border-radius: 15px; background: #fff0f0; color: #a52828; font-size: 24px; font-weight: 800; }
+.admin-confirm-dialog h2 { margin: 0 0 8px; color: #183b2a; font-size: 21px; }
+.admin-confirm-dialog p { margin: 0; color: #66766c; line-height: 1.65; overflow-wrap: anywhere; }
+.admin-confirm-dialog .admin-confirm-error { margin-top: 14px; color: #a52828; }
+.admin-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.admin-confirm-actions button { min-width: 104px; min-height: 42px; }
+.admin-confirm-actions button:disabled { cursor: wait; opacity: .7; }
+@keyframes admin-dialog-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 520px) { .admin-confirm-dialog { padding: 22px; border-radius: 16px; } .admin-confirm-actions { flex-direction: column-reverse; } .admin-confirm-actions button { width: 100%; } }
+
+.admin-community-page { max-width: 1180px; }
 .admin-community-page .moderation-section { margin-top: 0; }
 .reason-label { margin: 14px 0 8px; font-size: 14px; }
 .reason-picker { min-width: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--cream); }
